@@ -5,4 +5,6 @@ cache/large/*
 !cache/thumb/.keep
 !cache/large/.keep
 .DS_Store
+execution
 images
+

@@ -14,6 +14,7 @@
         <div class="atlas__brand">ATLAS</div>
         <div id="atlas-context" class="atlas__context">Human Consciousness</div>
       </div>
+      <div class="atlas__signature" aria-hidden="true">A MAP OF HUMAN CONSCIOUSNESS<span>EXPLORE · UNDERSTAND · EXPAND</span></div>
       <div class="atlas__hud-right">
         <span id="atlas-depth" class="atlas__depth">DEPTH 01</span>
         <button id="atlas-back" class="atlas__back" type="button" hidden aria-label="Go back one level">← BACK</button>
@@ -43,55 +44,19 @@
       <svg id="atlas-connections" class="atlas__connections" aria-hidden="true"></svg>
 
       <div id="atlas-head" class="atlas__head" aria-hidden="true">
-        <svg id="head-front" viewBox="0 0 320 410" role="presentation">
-          <defs>
-            <radialGradient id="frontBrainGlow" cx="50%" cy="34%" r="48%">
-              <stop offset="0" stop-color="#8ee4ff" stop-opacity=".16"/>
-              <stop offset="1" stop-color="#8ee4ff" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <ellipse class="head__halo" cx="160" cy="164" rx="123" ry="142"/>
-          <ellipse class="head__halo head__halo--inner" cx="160" cy="153" rx="96" ry="112"/>
-          <path class="head__glow-fill" d="M160 35c-69 0-111 51-111 121 0 55 17 91 43 119 12 13 17 30 13 48-5 23-18 45-34 69 26 14 56 21 89 21s63-7 89-21c-16-24-29-46-34-69-4-18 1-35 13-48 26-28 43-64 43-119 0-70-42-121-111-121Z" fill="url(#frontBrainGlow)"/>
-          <path class="head__shell" d="M160 35c-69 0-111 51-111 121 0 55 17 91 43 119 12 13 17 30 13 48-5 23-18 45-34 69 26 14 56 21 89 21s63-7 89-21c-16-24-29-46-34-69-4-18 1-35 13-48 26-28 43-64 43-119 0-70-42-121-111-121Z"/>
-          <path class="head__secondary" d="M103 306c18 16 37 24 57 24s39-8 57-24M106 370c16 12 34 18 54 18s38-6 54-18"/>
-          <path class="head__face" d="M112 180c13-8 28-9 42-3M166 177c15-5 31-4 43 4M160 177v65l-15 17 15 6 15-6M132 287c17 9 39 9 56 0"/>
-          <path class="head__brain" d="M91 128c5-38 31-67 69-68 39-1 66 28 71 68-5 36-31 66-71 67-39 0-65-30-69-67Z"/>
-          <path class="head__brain-line" d="M111 88c20 5 31 18 33 38-17 3-29 13-35 29M146 66c-2 20 5 35 20 44-10 17-9 36 3 55M188 79c-19 7-30 21-31 40 17 4 29 15 34 31M100 118c20 4 34 15 42 32M219 116c-20 5-34 17-42 34M122 170c16-10 31-12 45-5"/>
-          <path class="head__circuit" d="M97 139h-24v32h20M223 139h24v32h-20M116 107h-28v-19h-19M204 107h28v-19h19M125 199v24h-29v22M195 199v24h29v22"/>
-          <g class="head__points">
-            <circle cx="116" cy="96" r="3"/><circle cx="157" cy="86" r="3"/><circle cx="201" cy="99" r="3"/>
-            <circle cx="102" cy="135" r="3"/><circle cx="145" cy="126" r="3"/><circle cx="183" cy="128" r="3"/><circle cx="220" cy="139" r="3"/>
-            <circle cx="119" cy="166" r="3"/><circle cx="160" cy="169" r="3"/><circle cx="199" cy="165" r="3"/>
-            <circle cx="126" cy="219" r="2.5"/><circle cx="194" cy="219" r="2.5"/><circle cx="160" cy="244" r="2.5"/>
-          </g>
-          <path class="head__scan" d="M55 155h34M231 155h34M160 24v25M160 199v26"/>
-        </svg>
-
-        <svg id="head-profile" viewBox="0 0 340 410" hidden role="presentation">
-          <defs>
-            <radialGradient id="profileBrainGlow" cx="48%" cy="34%" r="48%">
-              <stop offset="0" stop-color="#8ee4ff" stop-opacity=".17"/>
-              <stop offset="1" stop-color="#8ee4ff" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <ellipse class="head__halo" cx="172" cy="164" rx="130" ry="143"/>
-          <ellipse class="head__halo head__halo--inner" cx="170" cy="153" rx="102" ry="112"/>
-          <path class="head__glow-fill" d="M204 38c-72-6-128 32-148 94-15 47-8 101 13 131 11 16 26 28 43 37l-4 81c30 14 65 17 101 8-15-28-20-57-15-86 4-20 15-34 33-47 29-21 45-55 48-97 5-68-19-115-71-121Z" fill="url(#profileBrainGlow)"/>
-          <path class="head__shell" d="M204 38c-72-6-128 32-148 94-15 47-8 101 13 131 11 16 26 28 43 37l-4 81c30 14 65 17 101 8-15-28-20-57-15-86 4-20 15-34 33-47 29-21 45-55 48-97 5-68-19-115-71-121Z"/>
-          <path class="head__face" d="M238 118c14 9 22 22 24 39l-16 15 12 14-19 11c1 24-9 40-29 49M206 183c10 3 18 3 26-1M230 213c-9 6-18 7-26 4"/>
-          <path class="head__brain" d="M87 126c15-47 50-72 101-70 48 2 80 30 87 76-8 42-39 70-86 72-49 2-84-26-102-78Z"/>
-          <path class="head__brain-line" d="M112 83c22 1 39 12 50 31-14 12-20 27-17 45M161 60c10 19 11 37 2 54 18 10 27 25 28 44M211 68c-15 12-22 27-19 47 18 2 31 12 40 29M95 119c24 1 41 9 53 24M245 115c-22 5-38 16-46 34M116 177c19-11 38-13 57-7"/>
-          <path class="head__circuit" d="M100 147H69v30h25M228 92h30v-19h19M179 196v25h32v24M137 104h-27V82H92"/>
-          <g class="head__points">
-            <circle cx="111" cy="98" r="3"/><circle cx="154" cy="79" r="3"/><circle cx="203" cy="85" r="3"/>
-            <circle cx="98" cy="137" r="3"/><circle cx="143" cy="126" r="3"/><circle cx="187" cy="126" r="3"/><circle cx="228" cy="136" r="3"/>
-            <circle cx="120" cy="173" r="3"/><circle cx="164" cy="168" r="3"/><circle cx="210" cy="167" r="3"/>
-            <circle cx="179" cy="221" r="2.5"/><circle cx="205" cy="244" r="2.5"/>
-          </g>
-          <path class="head__secondary" d="M112 298c27 13 55 16 82 9M112 347c27 13 58 14 91 3"/>
-          <path class="head__scan" d="M58 156h30M250 156h34M170 26v27M170 204v24"/>
-        </svg>
+        <div id="head-front" class="head__artwork">
+          <img class="head__image" alt="" hidden>
+          <div class="head__placeholder"><span>ARTWORK 01</span><strong>Frontal hologram</strong><small>Awaiting artwork</small></div>
+        </div>
+        <div id="head-three-quarter" class="head__artwork" hidden>
+          <img class="head__image" alt="" hidden>
+          <div class="head__placeholder"><span>ARTWORK 02</span><strong>Turning hologram</strong><small>Awaiting artwork</small></div>
+        </div>
+        <div id="head-profile" class="head__artwork" hidden>
+          <img class="head__image" alt="" hidden>
+          <div class="head__placeholder"><span>ARTWORK 03</span><strong>Profile hologram</strong><small>Awaiting artwork</small></div>
+        </div>
+        <div class="head__caption">CONSCIOUSNESS<span>THE INTERFACE WITHIN</span></div>
       </div>
 
       <div id="atlas-nodes" class="atlas__nodes"></div>
@@ -109,7 +74,7 @@
           <div class="detail__actions">
             <button id="detail-fullscreen-button" class="detail__fullscreen-button" type="button">FULL SCREEN VIEW</button>
           </div>
-          <p class="detail__hint">High-resolution original loaded only at this level.</p>
+          <p class="detail__hint">Inspect the complete diagram in full screen.</p>
         </aside>
       </article>
 

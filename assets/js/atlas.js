@@ -14,6 +14,7 @@
   const backBtn = document.getElementById('atlas-back');
   const head = document.getElementById('atlas-head');
   const headFront = document.getElementById('head-front');
+  const headThreeQuarter = document.getElementById('head-three-quarter');
   const headProfile = document.getElementById('head-profile');
   const detailEl = document.getElementById('atlas-detail');
   const detailImage = document.getElementById('detail-image');
@@ -27,7 +28,12 @@
   const emptyEl = document.getElementById('atlas-empty');
 
   const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
-  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+  let prefersReducedMotion = motionPreference.matches;
+  let headTurnId = 0;
+  let headTurning = false;
+  let headAnimations = [];
+  let mirroredHead = false;
   const CHUNK = 6;
   const WHEEL_SENSITIVITY = 0.0025;
   const ENTER_SCROLL_THRESHOLD = 88;
@@ -49,25 +55,25 @@
 
   // Active nodes deliberately differ in size and proportion, following Concept 03.
   const LARGE_DESKTOP = [
-    [29, 19, 26, 18],
-    [68, 18, 18, 20],
-    [82, 46, 20, 25],
-    [68, 78, 29, 16],
-    [29, 79, 22, 20],
-    [17, 49, 19, 22]
+    [24, 26, 28, 35],
+    [49, 15, 19, 23],
+    [76, 23, 23, 32],
+    [80, 59, 29, 34],
+    [68, 86, 20, 17],
+    [22, 71, 25, 31]
   ];
   const LARGE_MOBILE = [
-    [50, 14, 48, 15],
-    [22, 31, 37, 18],
-    [78, 31, 35, 20],
-    [22, 69, 36, 20],
-    [78, 69, 39, 17],
-    [50, 87, 50, 15]
+    [27, 16, 45, 23],
+    [76, 14, 34, 19],
+    [81, 43, 32, 23],
+    [75, 76, 44, 24],
+    [24, 81, 37, 20],
+    [20, 48, 33, 22]
   ];
 
-  // The immediately previous six sit in the gaps between the new dominant chambers.
-  const SMALL_DESKTOP = [[49,11],[82,28],[84,68],[50,90],[16,69],[15,29]];
-  const SMALL_MOBILE = [[22,15],[78,15],[8,50],[92,50],[23,86],[77,86]];
+  // Previous chambers occupy the spaces between the dominant lenses.
+  const SMALL_DESKTOP = [[32,49],[64,10],[94,38],[48,86],[7,48],[63,44]];
+  const SMALL_MOBILE = [[50,5],[94,28],[93,60],[49,94],[7,65],[6,31]];
 
   // Older history remains as small traces distributed through negative space, not on rings.
   const TINY_DESKTOP = [
@@ -82,15 +88,16 @@
   ];
 
   // Distinct anatomical targets on the hologram. No connection converges on the centre.
+  // Calibrated to the uploaded 1024 × 1536 masters and CSS registration.
   const FRONT_ANCHORS = [
-    [.36,.23],[.61,.22],[.29,.34],[.70,.35],[.37,.46],[.62,.47],
-    [.31,.57],[.68,.57],[.43,.31],[.55,.32],[.46,.41],[.59,.41],
-    [.39,.63],[.61,.64],[.48,.53],[.53,.71],[.28,.44],[.72,.45]
+    [.30,.23],[.50,.14],[.69,.24],[.73,.36],[.61,.56],[.27,.43],
+    [.36,.31],[.64,.31],[.43,.23],[.57,.23],[.34,.38],[.66,.38],
+    [.39,.53],[.61,.53],[.46,.46],[.53,.69],[.28,.35],[.72,.35]
   ];
   const PROFILE_ANCHORS = [
-    [.34,.24],[.49,.20],[.65,.25],[.29,.35],[.45,.33],[.61,.34],
-    [.72,.39],[.34,.47],[.50,.45],[.64,.47],[.43,.57],[.61,.57],
-    [.70,.63],[.48,.68],[.58,.74],[.36,.61],[.77,.50],[.27,.43]
+    [.23,.24],[.47,.15],[.71,.23],[.76,.34],[.64,.54],[.40,.40],
+    [.32,.30],[.53,.25],[.65,.29],[.37,.22],[.43,.35],[.56,.39],
+    [.55,.48],[.42,.58],[.47,.68],[.36,.50],[.78,.44],[.24,.31]
   ];
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -321,6 +328,7 @@
   function buildNodes() {
     nodesEl.hidden = false;
     detailEl.hidden = true;
+    root.classList.remove('is-detail');
     nodeMap.clear();
     const fragment = document.createDocumentFragment();
 
@@ -393,6 +401,7 @@
       node.style.setProperty('--label-opacity', String(clamp(g.label * 1.15, 0, 1)));
       node.style.pointerEvents = g.opacity > .08 && g.w > 1 ? 'auto' : 'none';
       node.dataset.role = g.role;
+      node.tabIndex = g.opacity > .08 && g.w > 1 ? 0 : -1;
       if (selectedIndex === index) node.classList.add('is-selected');
       else if (isTouch) node.classList.remove('is-selected');
       ensureNodeImage(node, item, g);
@@ -431,19 +440,76 @@
     depthEl.textContent = `DEPTH ${(depth + 1).toFixed(2)}`;
   }
 
-  function setHeadPerspective(nextMode) {
-    if (nextMode === 'categories') {
-      head.classList.remove('is-profile');
-      headFront.hidden = false;
-      headProfile.hidden = true;
-      headProfile.style.transform = '';
-    } else {
-      head.classList.add('is-profile');
-      headFront.hidden = true;
-      headProfile.hidden = false;
-      const categoryIndex = Math.max(0, catalog.collections.indexOf(activeCategory));
-      headProfile.style.transform = categoryIndex % 2 ? 'scaleX(-1)' : '';
+  // Null entries intentionally show the artwork slots, without broken image requests.
+  async function loadHeadArtwork() {
+    try {
+      const response = await fetch('assets/artwork/manifest.json');
+      if (!response.ok) return;
+      const artwork = await response.json();
+      for (const [key, container] of [['front', headFront], ['threeQuarter', headThreeQuarter], ['profile', headProfile]]) {
+        const filename = artwork[key];
+        if (typeof filename !== 'string' || !/^[a-z0-9-]+\.(png|webp)$/i.test(filename)) continue;
+        const img = container.querySelector('img');
+        img.addEventListener('load', () => {
+          img.hidden = false;
+          container.classList.add('is-ready');
+          drawConnections();
+        }, { once: true });
+        img.decoding = 'async';
+        img.fetchPriority = key === 'front' ? 'high' : 'low';
+        img.src = `assets/artwork/${filename}`;
+      }
+    } catch (_) {
+      // Keep the explicit artwork placeholder if the manifest is unavailable.
     }
+  }
+
+  function finishHeadTurn() {
+    headTurnId++;
+    headAnimations.forEach(animation => animation.cancel());
+    headAnimations = [];
+    headTurning = false;
+    root.classList.remove('is-turning');
+    nodesEl.inert = false;
+    const target = head.dataset.pose === 'profile' ? headProfile : headFront;
+    [headFront, headThreeQuarter, headProfile].forEach(view => { view.hidden = view !== target; });
+    drawConnections();
+  }
+
+  function setHeadPerspective(nextMode) {
+    const from = head.dataset.pose === 'profile' ? headProfile : headFront;
+    const to = nextMode === 'categories' ? headFront : headProfile;
+    finishHeadTurn();
+    head.dataset.pose = to === headFront ? 'front' : 'profile';
+    head.classList.toggle('is-profile', to === headProfile);
+    if (to === headProfile) {
+      mirroredHead = Math.max(0, catalog.collections.indexOf(activeCategory)) % 2 === 1;
+    }
+    head.style.setProperty('--head-direction', mirroredHead ? '-1' : '1');
+    head.style.translate = '0px 0px';
+    const views = [headFront, headThreeQuarter, headProfile];
+    if (from === to || prefersReducedMotion || !views.every(view => view.classList.contains('is-ready'))) {
+      views.forEach(view => { view.hidden = view !== to; });
+      return;
+    }
+
+    headTurning = true;
+    nodesEl.inert = true;
+    root.classList.add('is-turning');
+    connections.replaceChildren();
+    views.forEach(view => { view.hidden = false; });
+    const turnId = headTurnId;
+    const timing = { duration: 820, fill: 'both', easing: 'linear' };
+    // Short overlaps minimize double faces; the middle pose holds briefly.
+    headAnimations = [
+      from.animate([{opacity:1,offset:0},{opacity:1,offset:.12},{opacity:0,offset:.35},{opacity:0,offset:1}], timing),
+      headThreeQuarter.animate([{opacity:0,offset:0},{opacity:0,offset:.17},{opacity:1,offset:.38},{opacity:1,offset:.56},{opacity:0,offset:.79},{opacity:0,offset:1}], timing),
+      to.animate([{opacity:0,offset:0},{opacity:0,offset:.61},{opacity:1,offset:.85},{opacity:1,offset:1}], timing),
+      nodesEl.animate([{opacity:0,transform:'scale(1.04)',offset:0},{opacity:0,transform:'scale(1.04)',offset:.42},{opacity:1,transform:'scale(1)',offset:1}], timing)
+    ];
+    Promise.all(headAnimations.map(animation => animation.finished)).then(() => {
+      if (turnId === headTurnId) finishHeadTurn();
+    }).catch(() => { /* A back/detail action or motion preference change cancelled the turn. */ });
   }
 
   function activate(index, element) {
@@ -457,6 +523,7 @@
   }
 
   function enter(index) {
+    if (headTurning) return;
     const item = currentItems()[index];
     if (!item) return;
 
@@ -481,6 +548,8 @@
   }
 
   function showDetail(index) {
+    finishHeadTurn();
+    root.classList.add('is-detail');
     cancelAnimationFrame(animationFrame);
     animationFrame = 0;
     nodesEl.hidden = true;
@@ -568,7 +637,9 @@
   }
 
   function onWheel(event) {
+    if (event.ctrlKey) return;
     event.preventDefault();
+    if (headTurning) return;
 
     if (mode === 'detail') {
       if (event.deltaY > 65) back();
@@ -601,7 +672,9 @@
 
   function drawConnections() {
     connections.replaceChildren();
-    if (mode === 'detail' || nodesEl.hidden) return;
+    if (mode === 'detail' || nodesEl.hidden || headTurning) return;
+    const activeHead = mode === 'categories' ? headFront : headProfile;
+    if (!activeHead.classList.contains('is-ready')) return;
 
     const stageRect = stage.getBoundingClientRect();
     const headRect = head.getBoundingClientRect();
@@ -619,14 +692,14 @@
       const anchor = anchors[index % anchors.length];
       let ax = headRect.left - stageRect.left + headRect.width * anchor[0];
       const ay = headRect.top - stageRect.top + headRect.height * anchor[1];
-      if (mode === 'diagrams' && headProfile.style.transform.includes('scaleX')) {
+      if (mode === 'diagrams' && mirroredHead) {
         ax = headRect.left - stageRect.left + headRect.width * (1 - anchor[0]);
       }
 
       const cx = stageRect.width * g.x / 100;
       const cy = stageRect.height * g.y / 100;
-      const rx = Math.max(5, stageRect.width * g.w / 200 * .92);
-      const ry = Math.max(4, stageRect.height * g.h / 200 * .92);
+      const rx = Math.max(5, stageRect.width * g.w / 200);
+      const ry = Math.max(4, stageRect.height * g.h / 200);
       const start = ellipseEdgePoint(cx, cy, rx, ry, ax, ay);
       const dx = ax - start.x;
       const dy = ay - start.y;
@@ -670,11 +743,11 @@
     if (event.key === 'Escape' || event.key === 'Backspace') {
       event.preventDefault();
       back();
-    } else if (event.key === 'ArrowDown') {
+    } else if (event.key === 'ArrowDown' && !headTurning) {
       event.preventDefault();
       targetDepth = clamp(Math.ceil(targetDepth + .01), 0, maxDepth());
       scheduleAnimation();
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'ArrowUp' && !headTurning) {
       event.preventDefault();
       if (selectedIndex !== null) enter(selectedIndex);
       else {
@@ -707,7 +780,7 @@
     if (event.pointerType !== 'touch' || touchStartY === null) return;
     const dy = event.clientY - touchStartY;
     touchStartY = null;
-    if (!touchMoved || Math.abs(dy) < 48) return;
+    if (headTurning || !touchMoved || Math.abs(dy) < 48) return;
     if (dy < 0) {
       targetDepth = clamp(Math.floor(targetDepth + 1.01), 0, maxDepth());
     } else {
@@ -716,6 +789,35 @@
     scheduleAnimation();
   });
 
+  let parallaxFrame = 0;
+  stage.addEventListener('pointermove', event => {
+    if (isTouch || prefersReducedMotion || headTurning || mode === 'detail' || parallaxFrame) return;
+    const x = event.clientX;
+    const y = event.clientY;
+    parallaxFrame = requestAnimationFrame(() => {
+      parallaxFrame = 0;
+      if (prefersReducedMotion || headTurning || mode === 'detail') return;
+      const rect = stage.getBoundingClientRect();
+      head.style.translate = `${((x - rect.left) / rect.width - .5) * 6}px ${((y - rect.top) / rect.height - .5) * 4}px`;
+      drawConnections();
+    });
+  });
+  stage.addEventListener('pointerleave', () => {
+    cancelAnimationFrame(parallaxFrame);
+    parallaxFrame = 0;
+    head.style.translate = '0px 0px';
+    drawConnections();
+  });
+  motionPreference.addEventListener('change', event => {
+    prefersReducedMotion = event.matches;
+    if (prefersReducedMotion) {
+      finishHeadTurn();
+      head.style.translate = '0px 0px';
+      drawConnections();
+    }
+  });
+
+  loadHeadArtwork();
   loadCatalog().then(() => {
     setHeadPerspective('categories');
     buildNodes();

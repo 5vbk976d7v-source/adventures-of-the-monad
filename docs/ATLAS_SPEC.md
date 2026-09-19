@@ -1,6 +1,7 @@
 # Consciousness Atlas — Product & Interaction Specification
 
-Version: 0.2  
+Version: 0.3
+
 Status: active implementation
 
 ## 1. Purpose
@@ -118,7 +119,9 @@ It must contain multiple technical layers:
 - faint holographic halos;
 - front and profile perspectives.
 
-The head remains SVG in the current architecture so it is resolution-independent and inexpensive to animate. A 3D replacement may be introduced later without changing the atlas data model.
+Following the September 2026 design review, the head uses three supplied raster artworks: front, three-quarter and profile. These replace the rejected procedural SVG heads. `assets/artwork/manifest.json` identifies the masters; CSS blends their dark backgrounds into the field and aligns their framing.
+
+Entering a category plays an 820 ms front → three-quarter → profile crossfade, reversed on return. Both turned views mirror together for alternating categories. Connectors resume when the pose settles. A small desktop pointer parallax moves the head and its connection endpoints together. Reduced motion uses a direct pose change and disables parallax. Diagram detail hides the head entirely. This is a transition between matched stills, not free 3D rotation.
 
 ### Connection behaviour
 
@@ -344,7 +347,7 @@ Connections are redrawn against stored node geometry and distinct head anchor po
 
 `prefers-reduced-motion` is respected.
 
-## 16. Current implementation status — v0.2
+## 16. Current implementation status — v0.3
 
 Implemented:
 
@@ -353,7 +356,7 @@ Implemented:
 - continuous smooth interpolation between depth stages;
 - asymmetric oval chambers with variable sizes;
 - interstitial small/tiny historical nodes;
-- designed front/profile holographic head/brain SVGs;
+- supplied front/three-quarter/profile head artwork, reversible turning transition and desktop parallax;
 - distinct connection anchors across the hologram;
 - desktop hover/click + wheel semantic zoom;
 - mobile tap/tap-again + vertical swipe;
