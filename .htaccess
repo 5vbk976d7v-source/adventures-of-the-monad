@@ -1,0 +1,16 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# If a derivative exists it is served directly by Apache.
+# Only cache misses reach image.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^cache/(micro|thumb|large)/(.*\.(?:png|jpe?g|webp))\.webp$ image.php?size=$1&file=$2 [L,QSA,NC]
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(?:css|js|svg|webp)$">
+    Header set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+</IfModule>

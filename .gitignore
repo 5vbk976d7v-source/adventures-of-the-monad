@@ -1,0 +1,8 @@
+cache/micro/*
+cache/thumb/*
+cache/large/*
+!cache/micro/.keep
+!cache/thumb/.keep
+!cache/large/.keep
+.DS_Store
+images
