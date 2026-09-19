@@ -1,3 +1,6 @@
+import { buildDiagramLink, clearDiagramLink, findDiagramFromLink, loadCatalog, readDiagramLink, safeText } from './atlas-catalog.js';
+import { createDiagramSearch } from './atlas-search.js';
+
 (() => {
   'use strict';
 
@@ -22,10 +25,14 @@
   const detailTitle = document.getElementById('detail-title');
   const detailCaption = document.getElementById('detail-caption');
   const detailFullscreenBtn = document.getElementById('detail-fullscreen-button');
+  const detailCopyLinkBtn = document.getElementById('detail-copy-link-button');
   const fullscreenEl = document.getElementById('atlas-fullscreen');
   const fullscreenImage = document.getElementById('atlas-fullscreen-image');
   const fullscreenClose = document.getElementById('atlas-fullscreen-close');
   const emptyEl = document.getElementById('atlas-empty');
+  const searchInput = document.getElementById('atlas-search-input');
+  const searchResults = document.getElementById('atlas-search-results');
+  const meters = [...document.querySelectorAll('.atlas__meter')];
 
   const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
@@ -35,8 +42,18 @@
   let headAnimations = [];
   let mirroredHead = false;
   const CHUNK = 6;
-  const WHEEL_SENSITIVITY = 0.0025;
-  const ENTER_SCROLL_THRESHOLD = 88;
+
+  // Interaction tuning. These values are deliberately kept together so mouse,
+  // trackpad and touch behavior can be tuned without hunting through handlers.
+  const ATLAS_TUNING = {
+    wheelSensitivity: 0.0025,
+    enterScrollThreshold: 180,
+    backScrollThreshold: 2880, // Normalized wheel pixels, only at settled DEPTH 1.
+    intentIdleMs: 1750,
+    swipeDistance: 48,
+    backSwipeDistance: 96,
+    pinchSensitivity: 0.012
+  };
 
   let catalog = null;
   let mode = 'categories'; // categories | diagrams | detail
@@ -49,9 +66,26 @@
   let enterIntent = 0;
   let animationFrame = 0;
   let touchStartY = null;
+  let touchStartX = null;
+  let touchStartedAtBase = false;
   let touchMoved = false;
+  let suppressClickUntil = 0;
+  const touchPoints = new Map();
+  let pinchStartDistance = null;
+  let pinchStartDepth = null;
+  let backIntent = 0;
+  let lastWheelTime = 0;
+  let wheelContext = '';
   let lastHudStage = -1;
   const nodeMap = new Map();
+  const METER_OVERSHOOT = .65;
+  let meterDragging = false;
+  const diagramSearch = createDiagramSearch({
+    input: searchInput,
+    results: searchResults,
+    getCategory: () => activeCategory,
+    onSelect: selection => openDiagramSelection(selection)
+  });
 
   // Active nodes deliberately differ in size and proportion, following Concept 03.
   const LARGE_DESKTOP = [
@@ -103,56 +137,78 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  function safeText(value, fallback = '') {
-    return typeof value === 'string' && value.trim() ? value.trim() : fallback;
-  }
-
-  function demoCatalog() {
-    return {
-      demo: true,
-      collections: Array.from({ length: 16 }, (_, i) => ({
-        id: String(i + 1).padStart(2, '0'),
-        title: `Consciousness Field ${String(i + 1).padStart(2, '0')}`,
-        description: '',
-        cover: null,
-        images: Array.from({ length: 18 }, (__, j) => ({
-          id: `${String(i + 1).padStart(2, '0')}.${String(j + 1).padStart(2, '0')}`,
-          title: `Diagram ${String(j + 1).padStart(2, '0')}`,
-          caption: '',
-          original: null,
-          micro: null,
-          thumb: null,
-          large: null,
-          width: 1600,
-          height: 1000
-        }))
-      }))
-    };
-  }
-
-  async function fetchCatalog(url) {
-    const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-    if (!res.ok) throw new Error(`${url}: ${res.status}`);
-    const data = await res.json();
-    if (!data || !Array.isArray(data.collections) || data.collections.length === 0) {
-      throw new Error(`${url}: empty catalog`);
-    }
-    return data;
-  }
-
-  async function loadCatalog() {
-    const sources = ['catalog.php', 'catalog.json'];
-    for (const source of sources) {
-      try {
-        catalog = await fetchCatalog(source);
-        emptyEl.hidden = true;
-        return;
-      } catch (_) {
-        // Try the next independent catalog provider.
+  async function copyDiagramLink() {
+    const href = buildDiagramLink(activeCategory, activeDiagram);
+    if (!href || !detailCopyLinkBtn) return;
+    let copied = false;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(href);
+        copied = true;
       }
+    } catch (_) {
+      // Use the editable fallback below when clipboard permissions are unavailable.
     }
-    catalog = demoCatalog();
-    emptyEl.hidden = false;
+    if (!copied) {
+      const field = document.createElement('textarea');
+      field.value = href;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+      field.remove();
+    }
+    const label = detailCopyLinkBtn.textContent;
+    detailCopyLinkBtn.textContent = copied ? 'LINK COPIED' : 'COPY FAILED';
+    window.setTimeout(() => { detailCopyLinkBtn.textContent = label; }, 1800);
+  }
+
+  function openDiagramFromLink() {
+    const match = findDiagramFromLink(catalog, readDiagramLink());
+    if (!match) return false;
+    const { category, diagram, index } = match;
+    activeCategory = category;
+    activeDiagram = diagram;
+    activeDiagramIndex = index;
+    mode = 'diagrams';
+    depth = targetDepth = 0;
+    selectedIndex = null;
+    lastHudStage = -1;
+    setHeadPerspective('diagrams');
+    diagramSearch.setItems(searchableDiagrams());
+    buildNodes();
+    mode = 'detail';
+    showDetail(index);
+    return true;
+  }
+
+  function openDiagramSelection(selection) {
+    if (!selection) return;
+    const category = selection.category || activeCategory;
+    const diagram = selection.diagram || selection;
+    const index = Number.isInteger(selection.index)
+      ? selection.index
+      : category?.images?.indexOf(diagram);
+    if (!category || !diagram || index < 0) return;
+    activeCategory = category;
+    activeDiagram = diagram;
+    activeDiagramIndex = index;
+    mode = 'diagrams';
+    depth = targetDepth = 0;
+    selectedIndex = null;
+    lastHudStage = -1;
+    setHeadPerspective('diagrams');
+    buildNodes();
+    mode = 'detail';
+    showDetail(index);
+  }
+
+  function searchableDiagrams() {
+    return (catalog?.collections || []).flatMap(category =>
+      (category.images || []).map((diagram, index) => ({ category, diagram, index }))
+    );
   }
 
   function currentItems() {
@@ -269,8 +325,22 @@
   }
 
   function borderRadius(index) {
-    const variants = ['50% / 45%','46% / 52%','52% / 43%','48% / 50%','44% / 48%','53% / 46%'];
-    return variants[index % variants.length];
+    // Every chamber is a true ellipse; geometry below controls its 5:4 ratio.
+    return '50%';
+  }
+
+  function ellipseGeometry(geometry) {
+    const axisRatio = 5 / 4;
+    const stageRect = stage.getBoundingClientRect();
+    // Geometry is stored as percentages, but width and height percentages
+    // resolve against different pixel dimensions. Correct for that aspect ratio.
+    const percentageRatio = stageRect.width && stageRect.height
+      ? axisRatio * stageRect.height / stageRect.width
+      : axisRatio;
+    const area = Math.max(.12, geometry.w * geometry.h);
+    const w = Math.sqrt(area * percentageRatio);
+    const h = Math.sqrt(area / percentageRatio);
+    return { ...geometry, w, h };
   }
 
   function nodeCode(item, index) {
@@ -360,12 +430,12 @@
       if (!isTouch) {
         button.addEventListener('mouseenter', () => {
           selectedIndex = index;
-          enterIntent = 0;
+          resetWheelIntent();
           button.classList.add('is-selected');
         });
         button.addEventListener('mouseleave', () => {
           if (selectedIndex === index) selectedIndex = null;
-          enterIntent = 0;
+          resetWheelIntent();
           button.classList.remove('is-selected');
         });
       }
@@ -391,7 +461,7 @@
     nodeMap.forEach(({ node, item }, index) => {
       const a = keyframe(index, lower);
       const b = keyframe(index, upper);
-      const g = interpolateGeometry(a, b, t);
+      const g = ellipseGeometry(interpolateGeometry(a, b, t));
       node._atlasGeometry = g;
       node.style.left = `${g.x}%`;
       node.style.top = `${g.y}%`;
@@ -411,6 +481,67 @@
     drawConnections();
   }
 
+  function meterPosition(value, max = maxDepth()) {
+    const span = Math.max(1, max + METER_OVERSHOOT * 2);
+    return clamp((value + METER_OVERSHOOT) / span, 0, 1);
+  }
+
+  function updateMeters() {
+    const max = maxDepth();
+    const progress = meterPosition(depth, max) * 100;
+    const handle = meterPosition(targetDepth, max) * 100;
+    meters.forEach(meter => {
+      meter.style.setProperty('--meter-progress', `${progress}%`);
+      meter.style.setProperty('--meter-handle', `${handle}%`);
+      meter.setAttribute('aria-valuemax', String(max));
+      meter.setAttribute('aria-valuenow', targetDepth.toFixed(2));
+    });
+  }
+
+  function setDepthFromMeter(event, meter) {
+    if (mode === 'detail') return;
+    const track = meter.querySelector('.atlas__meter-track');
+    const rect = track.getBoundingClientRect();
+    const ratio = clamp(1 - (event.clientY - rect.top) / rect.height, 0, 1);
+    const max = maxDepth();
+    const raw = ratio * Math.max(1, max + METER_OVERSHOOT * 2) - METER_OVERSHOOT;
+    targetDepth = clamp(raw, 0, max);
+    scheduleAnimation();
+    updateMeters();
+  }
+
+  meters.forEach(meter => {
+    meter.addEventListener('pointerdown', event => {
+      if (event.button !== undefined && event.button !== 0) return;
+      meterDragging = true;
+      try { meter.setPointerCapture?.(event.pointerId); } catch (_) { /* Synthetic events may not have an active pointer. */ }
+      setDepthFromMeter(event, meter);
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    meter.addEventListener('pointermove', event => {
+      if (!meterDragging) return;
+      setDepthFromMeter(event, meter);
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    const stopDragging = event => {
+      meterDragging = false;
+      try { meter.releasePointerCapture?.(event.pointerId); } catch (_) { /* Pointer capture may already be released. */ }
+      event.stopPropagation();
+    };
+    meter.addEventListener('pointerup', stopDragging);
+    meter.addEventListener('pointercancel', stopDragging);
+    meter.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown' && event.key !== 'Home' && event.key !== 'End') return;
+      event.preventDefault();
+      if (event.key === 'Home') targetDepth = 0;
+      else if (event.key === 'End') targetDepth = maxDepth();
+      else targetDepth = clamp(targetDepth + (event.key === 'ArrowUp' ? .1 : -.1), 0, maxDepth());
+      scheduleAnimation();
+    });
+  });
+
   function dominantStage() {
     return clamp(Math.round(depth), 0, maxDepth());
   }
@@ -426,18 +557,19 @@
       if (mode === 'categories') {
         contextEl.textContent = `Human Consciousness · Fields ${String(chunkStart).padStart(2,'0')}–${String(chunkEnd).padStart(2,'0')}`;
         instructionEl.textContent = isTouch
-          ? 'SWIPE ↑ TO EXPAND · TAP TO SELECT · TAP AGAIN TO ENTER'
+          ? 'SWIPE ↑ / PINCH TOGETHER FOR MORE · TAP TWICE TO ENTER'
           : 'SCROLL ↓ TO EXPAND · HOVER + SCROLL ↑ OR CLICK TO ENTER';
         backBtn.hidden = true;
       } else {
         contextEl.textContent = `${safeText(activeCategory?.title,'Category')} · Plates ${String(chunkStart).padStart(2,'0')}–${String(chunkEnd).padStart(2,'0')}`;
         instructionEl.textContent = isTouch
-          ? 'SWIPE ↑ TO EXPAND · TAP TO SELECT · TAP AGAIN FOR DETAIL'
-          : 'SCROLL ↓ TO EXPAND · HOVER + SCROLL ↑ OR CLICK FOR DETAIL';
+          ? 'SWIPE ↑ FOR MORE · SWIPE ↓ TO RETURN · AT DEPTH 1, SWIPE ↓ AGAIN TO EXIT'
+          : 'SCROLL ↓ FOR MORE · ↑ TO RETURN · AT DEPTH 1, KEEP SCROLLING ↑ OFF A DIAGRAM TO EXIT';
         backBtn.hidden = false;
       }
     }
     depthEl.textContent = `DEPTH ${(depth + 1).toFixed(2)}`;
+    updateMeters();
   }
 
   // Null entries intentionally show the artwork slots, without broken image requests.
@@ -513,6 +645,7 @@
   }
 
   function activate(index, element) {
+    if (performance.now() < suppressClickUntil || headTurning) return;
     if (isTouch && selectedIndex !== index) {
       selectedIndex = index;
       enterIntent = 0;
@@ -526,6 +659,8 @@
     if (headTurning) return;
     const item = currentItems()[index];
     if (!item) return;
+    resetWheelIntent();
+    clearTouchGesture();
 
     if (mode === 'categories') {
       activeCategory = item;
@@ -534,6 +669,7 @@
       depth = targetDepth = 0;
       lastHudStage = -1;
       setHeadPerspective('diagrams');
+      diagramSearch.setItems(searchableDiagrams());
       buildNodes();
       return;
     }
@@ -566,6 +702,8 @@
     depthEl.textContent = 'DETAIL';
     instructionEl.textContent = 'FULL SCREEN FOR THE ORIGINAL · BACK TO RETURN';
     backBtn.hidden = false;
+    const href = buildDiagramLink(activeCategory, activeDiagram);
+    if (href) window.history.replaceState(null, '', href);
   }
 
   function openFullscreen() {
@@ -588,11 +726,15 @@
   }
 
   function back() {
+    resetWheelIntent();
+    clearTouchGesture();
     if (!fullscreenEl.hidden) {
       closeFullscreen();
       return;
     }
     if (mode === 'detail') {
+      clearDiagramLink();
+      diagramSearch.setItems(searchableDiagrams());
       mode = 'diagrams';
       activeDiagram = null;
       activeDiagramIndex = -1;
@@ -601,6 +743,8 @@
       return;
     }
     if (mode === 'diagrams') {
+      clearDiagramLink();
+      diagramSearch.setItems(searchableDiagrams());
       mode = 'categories';
       activeCategory = null;
       selectedIndex = null;
@@ -636,29 +780,64 @@
     scheduleAnimation();
   }
 
-  function onWheel(event) {
-    if (event.ctrlKey) return;
-    event.preventDefault();
-    if (headTurning) return;
+  function resetWheelIntent() {
+    enterIntent = 0;
+    backIntent = 0;
+    lastWheelTime = 0;
+    wheelContext = '';
+  }
 
-    if (mode === 'detail') {
-      if (event.deltaY > 65) back();
+  function atDiagramBase() {
+    return mode === 'diagrams' && targetDepth === 0 && depth < .001;
+  }
+
+  function normalizeWheelDelta(event) {
+    const multiplier = event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? window.innerHeight : 1;
+    return event.deltaY * multiplier;
+  }
+
+  function onWheel(event) {
+    if (event.ctrlKey) { resetWheelIntent(); return; }
+    event.preventDefault();
+    if (headTurning || mode === 'detail') { resetWheelIntent(); return; }
+    const wheelDelta = normalizeWheelDelta(event);
+    if (!wheelDelta) return;
+
+    // Wheel-down has exactly one job, including at the first/last generation.
+    if (wheelDelta > 0) {
+      resetWheelIntent();
+      adjustDepth(wheelDelta * ATLAS_TUNING.wheelSensitivity);
       return;
     }
 
-    // Scrolling inward while pointing at a node enters that semantic object.
-    if (!isTouch && event.deltaY < 0 && selectedIndex !== null) {
-      enterIntent += Math.abs(event.deltaY);
-      if (enterIntent >= ENTER_SCROLL_THRESHOLD) {
-        const target = selectedIndex;
-        enterIntent = 0;
-        enter(target);
+    // Use the actual event target: a stale hover must not enter a node behind the head.
+    const hoveredNode = event.target.closest?.('.atlas-node');
+    const hoveredIndex = hoveredNode && nodesEl.contains(hoveredNode)
+      ? Number(hoveredNode.dataset.index) : null;
+    const context = hoveredIndex !== null ? `enter:${hoveredIndex}` : atDiagramBase() ? 'back' : 'depth';
+    const now = performance.now();
+    if (context !== wheelContext || now - lastWheelTime > ATLAS_TUNING.intentIdleMs) resetWheelIntent();
+    wheelContext = context;
+    lastWheelTime = now;
+
+    if (hoveredIndex !== null) {
+      enterIntent += Math.abs(wheelDelta);
+      if (enterIntent >= ATLAS_TUNING.enterScrollThreshold) {
+        enter(hoveredIndex);
       }
       return;
     }
 
-    enterIntent = 0;
-    adjustDepth(event.deltaY * WHEEL_SENSITIVITY);
+    if (atDiagramBase()) {
+      backIntent += Math.abs(wheelDelta);
+      if (backIntent >= ATLAS_TUNING.backScrollThreshold) back();
+      return;
+    }
+
+    // Arrival at the base only changes depth. Overshoot and easing frames never
+    // count toward exit; further wheel-up must build a fresh back intent.
+    resetWheelIntent();
+    adjustDepth(wheelDelta * ATLAS_TUNING.wheelSensitivity);
   }
 
   function ellipseEdgePoint(cx, cy, rx, ry, tx, ty) {
@@ -730,6 +909,7 @@
   stage.addEventListener('wheel', onWheel, { passive: false });
   backBtn.addEventListener('click', back);
   detailFullscreenBtn.addEventListener('click', openFullscreen);
+  detailCopyLinkBtn.addEventListener('click', copyDiagramLink);
   fullscreenClose.addEventListener('click', closeFullscreen);
   fullscreenEl.addEventListener('click', event => {
     if (event.target === fullscreenEl) closeFullscreen();
@@ -740,6 +920,7 @@
   });
 
   stage.addEventListener('keydown', event => {
+    resetWheelIntent();
     if (event.key === 'Escape' || event.key === 'Backspace') {
       event.preventDefault();
       back();
@@ -764,29 +945,82 @@
     }
   });
 
+  function clearTouchGesture() {
+    touchPoints.clear();
+    touchStartY = touchStartX = null;
+    touchStartedAtBase = false;
+    pinchStartDistance = pinchStartDepth = null;
+  }
+
   stage.addEventListener('pointerdown', event => {
-    if (event.pointerType !== 'touch') return;
+    if (event.pointerType !== 'touch' || headTurning || mode === 'detail') return;
+    resetWheelIntent();
+    touchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (touchPoints.size >= 2) {
+      const points = [...touchPoints.values()];
+      pinchStartDistance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+      pinchStartDepth = targetDepth;
+      touchStartY = null;
+      touchMoved = true;
+      suppressClickUntil = performance.now() + 400;
+      event.preventDefault();
+      return;
+    }
     touchStartY = event.clientY;
+    touchStartX = event.clientX;
+    touchStartedAtBase = atDiagramBase();
     touchMoved = false;
   });
 
   stage.addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch' && touchStartY !== null && Math.abs(event.clientY - touchStartY) > 12) {
+    if (event.pointerType !== 'touch' || !touchPoints.has(event.pointerId)) return;
+    if (headTurning || mode === 'detail') { clearTouchGesture(); return; }
+    touchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (touchPoints.size >= 2 && pinchStartDistance !== null && pinchStartDepth !== null) {
+      const points = [...touchPoints.values()];
+      const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+      const pinchDelta = (pinchStartDistance - distance) * ATLAS_TUNING.pinchSensitivity;
+      targetDepth = clamp(pinchStartDepth + pinchDelta, 0, maxDepth());
+      suppressClickUntil = performance.now() + 400;
+      scheduleAnimation();
+      event.preventDefault();
+      return;
+    }
+    if (touchStartY !== null && Math.abs(event.clientY - touchStartY) > 12) {
       touchMoved = true;
+      suppressClickUntil = performance.now() + 400;
     }
   });
 
   stage.addEventListener('pointerup', event => {
-    if (event.pointerType !== 'touch' || touchStartY === null) return;
+    if (event.pointerType !== 'touch' || !touchPoints.has(event.pointerId)) return;
+    touchPoints.delete(event.pointerId);
+    if (touchMoved) suppressClickUntil = performance.now() + 400;
+    if (touchPoints.size < 2) {
+      pinchStartDistance = null;
+      pinchStartDepth = null;
+    }
+    if (touchStartY === null) return;
     const dy = event.clientY - touchStartY;
+    const dx = event.clientX - touchStartX;
     touchStartY = null;
-    if (headTurning || !touchMoved || Math.abs(dy) < 48) return;
+    if (headTurning || mode === 'detail' || !touchMoved || Math.abs(dx) > Math.abs(dy) || Math.abs(dy) < ATLAS_TUNING.swipeDistance) return;
     if (dy < 0) {
       targetDepth = clamp(Math.floor(targetDepth + 1.01), 0, maxDepth());
     } else {
+      if (touchStartedAtBase && atDiagramBase() && dy >= ATLAS_TUNING.backSwipeDistance) {
+        back();
+        return;
+      }
       targetDepth = clamp(Math.ceil(targetDepth - 1.01), 0, maxDepth());
     }
     scheduleAnimation();
+  });
+
+  stage.addEventListener('pointercancel', event => {
+    if (event.pointerType !== 'touch') return;
+    if (touchMoved) suppressClickUntil = performance.now() + 400;
+    clearTouchGesture();
   });
 
   let parallaxFrame = 0;
@@ -803,6 +1037,7 @@
     });
   });
   stage.addEventListener('pointerleave', () => {
+    resetWheelIntent();
     cancelAnimationFrame(parallaxFrame);
     parallaxFrame = 0;
     head.style.translate = '0px 0px';
@@ -818,8 +1053,11 @@
   });
 
   loadHeadArtwork();
-  loadCatalog().then(() => {
+  loadCatalog(emptyEl).then(loadedCatalog => {
+    catalog = loadedCatalog;
+    diagramSearch.setItems(searchableDiagrams());
     setHeadPerspective('categories');
     buildNodes();
+    openDiagramFromLink();
   });
 })();

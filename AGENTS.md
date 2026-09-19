@@ -155,34 +155,46 @@ Several sample groups contain 20–30+ images, so this can be tested now.
 
 ### Desktop
 
-- mouse wheel down: zoom outward through semantic depth;
-- mouse wheel up: zoom inward;
-- hover sets the current semantic target;
-- hover a category/diagram + scroll inward: enter that object after an intent threshold;
+- mouse wheel down always advances outward through semantic generations and stops at the final generation; it never exits the current semantic mode;
+- mouse wheel up over a hovered category/diagram accumulates intent toward entering that object after the configured threshold;
+- mouse wheel up over empty space or the head decreases continuous semantic depth;
+- at settled diagram depth 1, additional wheel-up intent accumulates toward returning to the category field after the configured back threshold;
+- arriving at depth 1 resets wheel intent, so the movement used to arrive there is not counted toward leaving diagrams;
+- intent resets when direction, target, or semantic state changes, and after the idle timeout;
 - click category/diagram: enter directly;
 - Arrow Down / Arrow Up: depth navigation;
-- Escape / Backspace: back one semantic level.
+- Escape / Backspace: explicit back one semantic level (including leaving detail); wheel does not auto-exit detail.
+- Two slim graded depth meters sit at the stage edges. Clicking or dragging either meter changes semantic depth; their visual scale extends slightly beyond both real depth limits.
 
 Important: wheel depth is **continuous**. `targetDepth` is a float and `depth` eases toward it with `requestAnimationFrame`. Do not revert to integer-only stage snapping for desktop wheel behavior.
 
-Relevant constants in `atlas.js`:
+Interaction tuning lives in the `ATLAS_TUNING` object in `atlas.js`:
 
 ```js
 const CHUNK = 6;
-const WHEEL_SENSITIVITY = 0.0025;
-const ENTER_SCROLL_THRESHOLD = 88;
+const ATLAS_TUNING = {
+  wheelSensitivity: 0.0025,
+  enterScrollThreshold: 180,
+  backScrollThreshold: 240,
+  intentIdleMs: 450,
+  backSwipeDistance: 96,
+  swipeDistance: 48,
+  pinchSensitivity: 0.012
+};
 ```
 
-Tune these only after testing both a normal mouse wheel and a high-resolution trackpad.
+`enterScrollThreshold` controls how much inward wheel intent is required to enter a hovered node. `wheelSensitivity` controls continuous desktop depth movement. At settled diagram depth 1, `backScrollThreshold` controls the additional wheel-up intent required to return to categories. `intentIdleMs` clears accumulated intent after inactivity. Vertical touch swipes use `swipeDistance` to advance or return between generations; a deliberate downward swipe beginning at settled diagram depth 1 uses `backSwipeDistance` to return to categories. `pinchSensitivity` controls touch pinch depth. Fingers moving together increase depth and fingers spreading decrease it. Pinch never changes semantic mode and never synthesizes a tap or swipe. Browser pinch outside the atlas/fullscreen view remains browser zoom, and Ctrl-wheel remains available for browser zoom. Tune these after testing both a normal mouse wheel and a high-resolution trackpad.
 
 ### Mobile / touch
 
 - vertical swipe up: next outward semantic generation;
-- vertical swipe down: previous inward generation;
+- vertical swipe down: previous inward semantic generation;
+- a deliberate downward swipe starting at settled diagram depth 1 returns to the category field;
 - first tap on node: select / highlight;
 - second tap on selected node: enter;
-- back control: one semantic level outward;
-- do not make pinch-to-zoom primary because it conflicts with browser/accessibility zoom.
+- back control: explicit back one semantic level;
+- pinch with fingers together increases depth; spread fingers decreases depth;
+- pinch never switches semantic mode or synthesizes a tap/swipe. Browser pinch outside the atlas/fullscreen view remains browser zoom.
 
 Mobile uses its own portrait composition arrays in `atlas.js`.
 
@@ -190,11 +202,15 @@ Mobile uses its own portrait composition arrays in `atlas.js`.
 
 Clicking / entering a diagram opens holographic detail inspection.
 
+The HUD title search searches all catalogued diagram titles and opens the selected diagram directly in detail mode.
+
 Required behavior already implemented:
 
 - original/high-resolution image is used for detail;
 - diagram is shown in a large oval inspection chamber;
 - title/code/caption remain visible;
+- **COPY PERMANENT LINK** copies a stable `?diagram=<category>/<diagram>` URL;
+- opening that URL loads the matching diagram directly in detail mode;
 - **FULL SCREEN VIEW** button opens the image in a viewport-filling dark overlay;
 - image uses `object-fit: contain`, never crop;
 - visible **CLOSE ×** control;

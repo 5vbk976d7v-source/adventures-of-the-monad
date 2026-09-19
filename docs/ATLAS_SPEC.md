@@ -175,11 +175,15 @@ The selected category's diagrams use the same semantic-depth system:
 
 ### Wheel / semantic depth
 
-- wheel down = continuous zoom outward;
+- wheel down always advances to the next outward semantic generation and stops at the final generation; it never exits the current semantic mode;
 - wheel delta maps to a continuous depth value rather than an integer state;
 - movement is eased toward the requested depth for a smooth trackpad/mouse experience;
-- wheel up with no target = continuous zoom inward;
-- wheel up while the cursor is over a category/diagram = semantic zoom **into that object** after a short intent threshold.
+- wheel up while the cursor is over a category/diagram accumulates intent to enter that object after the configured threshold;
+- wheel up over empty space or the head decreases continuous semantic depth;
+- at settled diagram depth 1, additional wheel-up intent returns to the category field after the configured back threshold;
+- arriving at depth 1 resets intent, so the arrival movement is not counted toward the back threshold;
+- intent resets when direction, target, or semantic state changes, and after the idle timeout;
+- detail mode is exited by explicit Back/Escape or its fullscreen/detail controls; wheel never auto-exits detail.
 
 ### Pointer
 
@@ -190,7 +194,8 @@ The selected category's diagrams use the same semantic-depth system:
 ### Keyboard
 
 - Arrow Down / Arrow Up move between depth stages;
-- Escape / Backspace returns one semantic level.
+- two subtle graded meter rails at the stage edges mirror semantic depth and support click or drag input, with a small visual overshoot beyond both limits;
+- Escape / Backspace explicitly returns one semantic level.
 
 ## 9. Mobile controls
 
@@ -198,10 +203,13 @@ Mobile preserves the same conceptual model but does not depend on hover.
 
 - vertical swipe upward = smoothly advance outward to the next depth stage;
 - vertical swipe downward = smoothly return inward;
+- a deliberate downward swipe starting at settled diagram depth 1 returns to the category field;
+- two-finger pinch with fingers moving together increases depth and fingers spreading decreases depth;
+- pinch never switches semantic mode and never synthesizes a tap or swipe;
 - first tap = select/highlight a node;
 - second tap on the selected node = enter it;
-- back control = one semantic level outward (detail → category → complete atlas);
-- pinch-to-zoom is not a primary control because it conflicts with browser/accessibility zoom.
+- back control = explicit one semantic level outward (detail → category → complete atlas);
+- browser pinch outside the atlas/fullscreen view remains browser zoom, and Ctrl-wheel remains available for browser zoom.
 
 Mobile uses a portrait-specific asymmetric layout. Previous nodes continue to occupy spaces between the current dominant chambers.
 
@@ -214,10 +222,14 @@ At this level:
 - the original/high-resolution image is loaded;
 - the diagram is shown in an oval inspection chamber;
 - title/code/caption remain visible;
+- a **COPY PERMANENT LINK** button copies a stable `?diagram=<category>/<diagram>` URL;
+- loading that URL after deployment opens the matching diagram directly in detail mode;
 - a **FULL SCREEN VIEW** button opens the original diagram in a viewport-filling dark overlay;
 - the full-screen view uses `object-fit: contain` and does not crop the diagram;
 - a clearly visible **CLOSE ×** button exits full-screen view;
 - clicking the dark backdrop or pressing Escape also closes it.
+
+The HUD also provides a title search across all catalogued diagrams. Matching titles appear in an autocomplete list; selecting one opens its category context and detail view directly.
 
 ## 11. Image performance strategy
 

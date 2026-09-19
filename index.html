@@ -16,6 +16,11 @@
       </div>
       <div class="atlas__signature" aria-hidden="true">A MAP OF HUMAN CONSCIOUSNESS<span>EXPLORE · UNDERSTAND · EXPAND</span></div>
       <div class="atlas__hud-right">
+        <div class="atlas-search" aria-label="Search diagrams">
+          <label class="atlas-search__label" for="atlas-search-input">FIND DIAGRAM</label>
+          <input id="atlas-search-input" class="atlas-search__input" type="search" placeholder="Search titles" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="atlas-search-results" disabled>
+          <div id="atlas-search-results" class="atlas-search__results" role="listbox" hidden></div>
+        </div>
         <span id="atlas-depth" class="atlas__depth">DEPTH 01</span>
         <button id="atlas-back" class="atlas__back" type="button" hidden aria-label="Go back one level">← BACK</button>
       </div>
@@ -40,6 +45,13 @@
         <path d="M90 380H1110M600 54V706" stroke="rgba(146,194,221,.07)"/>
         <path d="M0 145L1200 530" stroke="url(#fieldSweep)" stroke-width="58" opacity=".35"/>
       </svg>
+
+      <div class="atlas__meter atlas__meter--left" data-meter="left" role="slider" aria-label="Semantic depth" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
+        <div class="atlas__meter-track"><span class="atlas__meter-fill"></span><span class="atlas__meter-handle"></span></div>
+      </div>
+      <div class="atlas__meter atlas__meter--right" data-meter="right" role="slider" aria-label="Semantic depth" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
+        <div class="atlas__meter-track"><span class="atlas__meter-fill"></span><span class="atlas__meter-handle"></span></div>
+      </div>
 
       <svg id="atlas-connections" class="atlas__connections" aria-hidden="true"></svg>
 
@@ -73,6 +85,7 @@
           <p id="detail-caption"></p>
           <div class="detail__actions">
             <button id="detail-fullscreen-button" class="detail__fullscreen-button" type="button">FULL SCREEN VIEW</button>
+            <button id="detail-copy-link-button" class="detail__fullscreen-button" type="button">COPY PERMANENT LINK</button>
           </div>
           <p class="detail__hint">Inspect the complete diagram in full screen.</p>
         </aside>
@@ -94,6 +107,6 @@
     <img id="atlas-fullscreen-image" class="atlas-fullscreen__image" alt="">
   </div>
 
-  <script src="assets/js/atlas.js" defer></script>
+  <script type="module" src="assets/js/atlas.js"></script>
 </body>
 </html>
