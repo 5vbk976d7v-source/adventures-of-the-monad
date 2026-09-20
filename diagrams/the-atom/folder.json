@@ -1,0 +1,15 @@
+{
+  "id": "the-atom",
+  "title": "The Atom",
+  "order": 15,
+  "description": "",
+  "cover": "atom-leadbeater.png",
+  "images": [
+    {
+      "id": "atom-leadbeater",
+      "title": "Atom (Leadbeater)",
+      "file": "atom-leadbeater.png",
+      "caption": ""
+    }
+  ]
+}

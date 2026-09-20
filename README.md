@@ -1,26 +1,24 @@
 # Consciousness Atlas
 
-Independent Scientific / Holographic Atlas for technical diagrams about human consciousness.
+A static holographic atlas of consciousness diagrams, deployed on GitHub Pages.
 
-The atlas is intentionally decoupled from WordPress. Production uses static HTML/CSS/JS plus two narrow PHP services (`catalog.php` and `image.php`). Local development can run entirely with Node.js.
-
-## Run locally
+## Local preview
 
 ```bash
+npm ci
+npm run build
 npm start
 ```
 
-Then open `http://127.0.0.1:8080`.
-
-## Production
-
-Upload this directory as `/atlas/` beside the existing WordPress site.
-
-## Main documentation
-
-- `docs/ATLAS_SPEC.md` — agreed design, interaction, performance and security specification
-- `docs/DEPLOYMENT.md` — local and production deployment
+Open `http://127.0.0.1:8080/`. The local server serves the same `_site/` artifact as production. To test a GitHub project URL, use `BASE_PATH=/aom-atlas npm start` and open `http://127.0.0.1:8080/aom-atlas/`.
 
 ## Content
 
-Add category folders under `images/`. Optional `folder.json` controls title, order and cover. Production derivatives are generated lazily into `cache/`.
+Original images and explicit metadata live in `diagrams/<category>/`. The build generates the micro, thumb and large WebP sizes and `atlas.json`. Visitors fetch static files only.
+
+- [Image and agent workflow](docs/IMAGE_WORKFLOW.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Product specification](docs/ATLAS_SPEC.md)
+- [Imported document content](docs/CONTENT_IMPORT.md)
+
+The previous technical specifications and backend are preserved in `backups/pre-github-pages-2026-09-20.tar.gz`; they are excluded from deployment.

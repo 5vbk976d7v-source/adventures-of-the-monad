@@ -1,0 +1,15 @@
+{
+  "id": "path-to-initiation",
+  "title": "Path to Initiation",
+  "order": 12,
+  "description": "",
+  "cover": "seven-paths-of-service.png",
+  "images": [
+    {
+      "id": "seven-paths-of-service",
+      "title": "Seven Paths of Service",
+      "file": "seven-paths-of-service.png",
+      "caption": ""
+    }
+  ]
+}

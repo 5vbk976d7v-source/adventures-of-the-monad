@@ -6,46 +6,17 @@ export function diagramTitle(item, index = 0) {
   return safeText(item?.title, `Diagram ${String(index + 1).padStart(2, '0')}`);
 }
 
-function demoCatalog() {
-  return {
-    demo: true,
-    collections: Array.from({ length: 16 }, (_, i) => ({
-      id: String(i + 1).padStart(2, '0'),
-      title: `Consciousness Field ${String(i + 1).padStart(2, '0')}`,
-      description: '',
-      cover: null,
-      images: Array.from({ length: 18 }, (__, j) => ({
-        id: `${String(i + 1).padStart(2, '0')}.${String(j + 1).padStart(2, '0')}`,
-        title: `Diagram ${String(j + 1).padStart(2, '0')}`,
-        caption: '', original: null, micro: null, thumb: null, large: null,
-        width: 1600, height: 1000
-      }))
-    }))
-  };
-}
-
-async function fetchCatalog(url) {
-  const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-  if (!res.ok) throw new Error(`${url}: ${res.status}`);
-  const data = await res.json();
-  if (!data || !Array.isArray(data.collections) || data.collections.length === 0) {
-    throw new Error(`${url}: empty catalog`);
-  }
-  return data;
-}
-
+// The same prebuilt catalog is served locally and on GitHub Pages.
 export async function loadCatalog(emptyEl) {
-  for (const source of ['catalog.php', 'catalog.json']) {
-    try {
-      const catalog = await fetchCatalog(source);
-      emptyEl.hidden = true;
-      return catalog;
-    } catch (_) {
-      // Try the next independent catalog provider.
-    }
+  const res = await fetch('atlas.json', { cache: 'no-cache', credentials: 'same-origin' });
+  if (!res.ok) throw new Error(`Atlas catalog: ${res.status}`);
+  const catalog = await res.json();
+  if (!catalog || !Array.isArray(catalog.collections)
+      || catalog.collections.some(category => !category.id || !Array.isArray(category.images))) {
+    throw new Error('Invalid Atlas catalog');
   }
-  emptyEl.hidden = false;
-  return demoCatalog();
+  emptyEl.hidden = true;
+  return catalog;
 }
 
 export function readDiagramLink(location = window.location) {

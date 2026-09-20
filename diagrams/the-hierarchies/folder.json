@@ -1,0 +1,15 @@
+{
+  "id": "the-hierarchies",
+  "title": "The Hierarchies",
+  "order": 11,
+  "description": "",
+  "cover": "hierarchy.png",
+  "images": [
+    {
+      "id": "hierarchy",
+      "title": "Hierarchy",
+      "file": "hierarchy.png",
+      "caption": ""
+    }
+  ]
+}

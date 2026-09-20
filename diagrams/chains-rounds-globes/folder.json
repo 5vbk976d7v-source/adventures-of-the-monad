@@ -1,0 +1,15 @@
+{
+  "id": "chains-rounds-globes",
+  "title": "Chains, Rounds & Globes",
+  "order": 9,
+  "description": "",
+  "cover": "the-root-races-of-the-4th-globe.png",
+  "images": [
+    {
+      "id": "the-root-races-of-the-4th-globe",
+      "title": "The Root Races of the 4th Globe",
+      "file": "the-root-races-of-the-4th-globe.png",
+      "caption": ""
+    }
+  ]
+}

@@ -1,0 +1,469 @@
+{
+  "version": 1,
+  "collections": [
+    {
+      "id": "cosmology-how-it-all-began",
+      "title": "Cosmology: How It All Began",
+      "description": "",
+      "cover": {
+        "id": "metaverse-antverse-and-universes",
+        "title": "Metaverse, Antverse and Universes",
+        "caption": "",
+        "original": "diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes.png",
+        "width": 5760,
+        "height": 3240,
+        "micro": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-micro.webp",
+        "thumb": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-thumb.webp",
+        "large": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-large.webp"
+      },
+      "images": [
+        {
+          "id": "metaverse-antverse-and-universes",
+          "title": "Metaverse, Antverse and Universes",
+          "caption": "",
+          "original": "diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes.png",
+          "width": 5760,
+          "height": 3240,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-thumb.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "the-monad-how-it-functions",
+      "title": "The Monad & How It Functions",
+      "description": "",
+      "cover": {
+        "id": "the-monad-the-soul-and-its-personalities",
+        "title": "The Monad, the Soul, and its Personalities",
+        "caption": "",
+        "original": "diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities.png",
+        "width": 3840,
+        "height": 2560,
+        "micro": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-micro.webp",
+        "thumb": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-thumb.webp",
+        "large": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-large.webp"
+      },
+      "images": [
+        {
+          "id": "the-monad-the-soul-and-its-personalities",
+          "title": "The Monad, the Soul, and its Personalities",
+          "caption": "",
+          "original": "diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities.png",
+          "width": 3840,
+          "height": 2560,
+          "micro": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-micro.webp",
+          "thumb": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-thumb.webp",
+          "large": "assets/diagrams/the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "envelopes-of-incarnation",
+      "title": "Envelopes of Incarnation",
+      "description": "",
+      "cover": {
+        "id": "emotional-envelope",
+        "title": "Emotional Envelope",
+        "caption": "",
+        "original": "diagrams/envelopes-of-incarnation/emotional-envelope.png",
+        "width": 3840,
+        "height": 2556,
+        "micro": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-micro.webp",
+        "thumb": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-thumb.webp",
+        "large": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-large.webp"
+      },
+      "images": [
+        {
+          "id": "emotional-envelope",
+          "title": "Emotional Envelope",
+          "caption": "",
+          "original": "diagrams/envelopes-of-incarnation/emotional-envelope.png",
+          "width": 3840,
+          "height": 2556,
+          "micro": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-micro.webp",
+          "thumb": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-thumb.webp",
+          "large": "assets/diagrams/envelopes-of-incarnation/emotional-envelope-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "development-of-consciousness",
+      "title": "Development of Consciousness",
+      "description": "",
+      "cover": {
+        "id": "levels-of-consciousness",
+        "title": "Levels of Consciousness",
+        "caption": "",
+        "original": "diagrams/development-of-consciousness/levels-of-consciousness.png",
+        "width": 3838,
+        "height": 2160,
+        "micro": "assets/diagrams/development-of-consciousness/levels-of-consciousness-micro.webp",
+        "thumb": "assets/diagrams/development-of-consciousness/levels-of-consciousness-thumb.webp",
+        "large": "assets/diagrams/development-of-consciousness/levels-of-consciousness-large.webp"
+      },
+      "images": [
+        {
+          "id": "levels-of-consciousness",
+          "title": "Levels of Consciousness",
+          "caption": "",
+          "original": "diagrams/development-of-consciousness/levels-of-consciousness.png",
+          "width": 3838,
+          "height": 2160,
+          "micro": "assets/diagrams/development-of-consciousness/levels-of-consciousness-micro.webp",
+          "thumb": "assets/diagrams/development-of-consciousness/levels-of-consciousness-thumb.webp",
+          "large": "assets/diagrams/development-of-consciousness/levels-of-consciousness-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "how-chakras-function",
+      "title": "How Chakras Function",
+      "description": "",
+      "cover": {
+        "id": "the-centres-chakras",
+        "title": "The Centres (Chakras)",
+        "caption": "",
+        "original": "diagrams/how-chakras-function/the-centres-chakras.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/how-chakras-function/the-centres-chakras-micro.webp",
+        "thumb": "assets/diagrams/how-chakras-function/the-centres-chakras-thumb.webp",
+        "large": "assets/diagrams/how-chakras-function/the-centres-chakras-large.webp"
+      },
+      "images": [
+        {
+          "id": "the-centres-chakras",
+          "title": "The Centres (Chakras)",
+          "caption": "",
+          "original": "diagrams/how-chakras-function/the-centres-chakras.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/how-chakras-function/the-centres-chakras-micro.webp",
+          "thumb": "assets/diagrams/how-chakras-function/the-centres-chakras-thumb.webp",
+          "large": "assets/diagrams/how-chakras-function/the-centres-chakras-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "types-of-energies",
+      "title": "Types of Energies",
+      "description": "",
+      "cover": {
+        "id": "rays-7",
+        "title": "Rays (7)",
+        "caption": "",
+        "original": "diagrams/types-of-energies/rays-7.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/types-of-energies/rays-7-micro.webp",
+        "thumb": "assets/diagrams/types-of-energies/rays-7-thumb.webp",
+        "large": "assets/diagrams/types-of-energies/rays-7-large.webp"
+      },
+      "images": [
+        {
+          "id": "rays-7",
+          "title": "Rays (7)",
+          "caption": "",
+          "original": "diagrams/types-of-energies/rays-7.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/types-of-energies/rays-7-micro.webp",
+          "thumb": "assets/diagrams/types-of-energies/rays-7-thumb.webp",
+          "large": "assets/diagrams/types-of-energies/rays-7-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "kingdoms-of-nature",
+      "title": "Kingdoms of Nature",
+      "description": "",
+      "cover": {
+        "id": "group-souls-across-the-kingdoms-consolidation",
+        "title": "Group Souls Across the Kingdoms - Consolidation",
+        "caption": "",
+        "original": "diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-micro.webp",
+        "thumb": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-thumb.webp",
+        "large": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-large.webp"
+      },
+      "images": [
+        {
+          "id": "group-souls-across-the-kingdoms-consolidation",
+          "title": "Group Souls Across the Kingdoms - Consolidation",
+          "caption": "",
+          "original": "diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-micro.webp",
+          "thumb": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-thumb.webp",
+          "large": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "understanding-emotions",
+      "title": "Understanding Emotions",
+      "description": "",
+      "cover": {
+        "id": "colours-associated-with-our-emotions",
+        "title": "Colours Associated with Our Emotions",
+        "caption": "",
+        "original": "diagrams/understanding-emotions/colours-associated-with-our-emotions.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-micro.webp",
+        "thumb": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-thumb.webp",
+        "large": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-large.webp"
+      },
+      "images": [
+        {
+          "id": "colours-associated-with-our-emotions",
+          "title": "Colours Associated with Our Emotions",
+          "caption": "",
+          "original": "diagrams/understanding-emotions/colours-associated-with-our-emotions.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-micro.webp",
+          "thumb": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-thumb.webp",
+          "large": "assets/diagrams/understanding-emotions/colours-associated-with-our-emotions-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "chains-rounds-globes",
+      "title": "Chains, Rounds & Globes",
+      "description": "",
+      "cover": {
+        "id": "the-root-races-of-the-4th-globe",
+        "title": "The Root Races of the 4th Globe",
+        "caption": "",
+        "original": "diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe.png",
+        "width": 3840,
+        "height": 2560,
+        "micro": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-micro.webp",
+        "thumb": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-thumb.webp",
+        "large": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-large.webp"
+      },
+      "images": [
+        {
+          "id": "the-root-races-of-the-4th-globe",
+          "title": "The Root Races of the 4th Globe",
+          "caption": "",
+          "original": "diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe.png",
+          "width": 3840,
+          "height": 2560,
+          "micro": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-micro.webp",
+          "thumb": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-thumb.webp",
+          "large": "assets/diagrams/chains-rounds-globes/the-root-races-of-the-4th-globe-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "death-reincarnation",
+      "title": "Death & Reincarnation",
+      "description": "",
+      "cover": {
+        "id": "number-of-incarnations",
+        "title": "Number of Incarnations",
+        "caption": "",
+        "original": "diagrams/death-reincarnation/number-of-incarnations.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/death-reincarnation/number-of-incarnations-micro.webp",
+        "thumb": "assets/diagrams/death-reincarnation/number-of-incarnations-thumb.webp",
+        "large": "assets/diagrams/death-reincarnation/number-of-incarnations-large.webp"
+      },
+      "images": [
+        {
+          "id": "number-of-incarnations",
+          "title": "Number of Incarnations",
+          "caption": "",
+          "original": "diagrams/death-reincarnation/number-of-incarnations.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/death-reincarnation/number-of-incarnations-micro.webp",
+          "thumb": "assets/diagrams/death-reincarnation/number-of-incarnations-thumb.webp",
+          "large": "assets/diagrams/death-reincarnation/number-of-incarnations-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "the-hierarchies",
+      "title": "The Hierarchies",
+      "description": "",
+      "cover": {
+        "id": "hierarchy",
+        "title": "Hierarchy",
+        "caption": "",
+        "original": "diagrams/the-hierarchies/hierarchy.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/the-hierarchies/hierarchy-micro.webp",
+        "thumb": "assets/diagrams/the-hierarchies/hierarchy-thumb.webp",
+        "large": "assets/diagrams/the-hierarchies/hierarchy-large.webp"
+      },
+      "images": [
+        {
+          "id": "hierarchy",
+          "title": "Hierarchy",
+          "caption": "",
+          "original": "diagrams/the-hierarchies/hierarchy.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/the-hierarchies/hierarchy-micro.webp",
+          "thumb": "assets/diagrams/the-hierarchies/hierarchy-thumb.webp",
+          "large": "assets/diagrams/the-hierarchies/hierarchy-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "path-to-initiation",
+      "title": "Path to Initiation",
+      "description": "",
+      "cover": {
+        "id": "seven-paths-of-service",
+        "title": "Seven Paths of Service",
+        "caption": "",
+        "original": "diagrams/path-to-initiation/seven-paths-of-service.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/path-to-initiation/seven-paths-of-service-micro.webp",
+        "thumb": "assets/diagrams/path-to-initiation/seven-paths-of-service-thumb.webp",
+        "large": "assets/diagrams/path-to-initiation/seven-paths-of-service-large.webp"
+      },
+      "images": [
+        {
+          "id": "seven-paths-of-service",
+          "title": "Seven Paths of Service",
+          "caption": "",
+          "original": "diagrams/path-to-initiation/seven-paths-of-service.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/path-to-initiation/seven-paths-of-service-micro.webp",
+          "thumb": "assets/diagrams/path-to-initiation/seven-paths-of-service-thumb.webp",
+          "large": "assets/diagrams/path-to-initiation/seven-paths-of-service-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "comparative-symbolism",
+      "title": "Comparative Symbolism",
+      "description": "",
+      "cover": {
+        "id": "the-christian-symbolism",
+        "title": "The Christian Symbolism",
+        "caption": "",
+        "original": "diagrams/comparative-symbolism/the-christian-symbolism.png",
+        "width": 3840,
+        "height": 2560,
+        "micro": "assets/diagrams/comparative-symbolism/the-christian-symbolism-micro.webp",
+        "thumb": "assets/diagrams/comparative-symbolism/the-christian-symbolism-thumb.webp",
+        "large": "assets/diagrams/comparative-symbolism/the-christian-symbolism-large.webp"
+      },
+      "images": [
+        {
+          "id": "the-christian-symbolism",
+          "title": "The Christian Symbolism",
+          "caption": "",
+          "original": "diagrams/comparative-symbolism/the-christian-symbolism.png",
+          "width": 3840,
+          "height": 2560,
+          "micro": "assets/diagrams/comparative-symbolism/the-christian-symbolism-micro.webp",
+          "thumb": "assets/diagrams/comparative-symbolism/the-christian-symbolism-thumb.webp",
+          "large": "assets/diagrams/comparative-symbolism/the-christian-symbolism-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "planes-of-matter",
+      "title": "Planes of Matter",
+      "description": "",
+      "cover": {
+        "id": "one-plane-two-distinct-envelopes",
+        "title": "One Plane, Two Distinct Envelopes",
+        "caption": "",
+        "original": "diagrams/planes-of-matter/one-plane-two-distinct-envelopes.png",
+        "width": 1672,
+        "height": 941,
+        "micro": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-micro.webp",
+        "thumb": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-thumb.webp",
+        "large": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-large.webp"
+      },
+      "images": [
+        {
+          "id": "one-plane-two-distinct-envelopes",
+          "title": "One Plane, Two Distinct Envelopes",
+          "caption": "",
+          "original": "diagrams/planes-of-matter/one-plane-two-distinct-envelopes.png",
+          "width": 1672,
+          "height": 941,
+          "micro": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-micro.webp",
+          "thumb": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-thumb.webp",
+          "large": "assets/diagrams/planes-of-matter/one-plane-two-distinct-envelopes-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "the-atom",
+      "title": "The Atom",
+      "description": "",
+      "cover": {
+        "id": "atom-leadbeater",
+        "title": "Atom (Leadbeater)",
+        "caption": "",
+        "original": "diagrams/the-atom/atom-leadbeater.png",
+        "width": 5760,
+        "height": 3240,
+        "micro": "assets/diagrams/the-atom/atom-leadbeater-micro.webp",
+        "thumb": "assets/diagrams/the-atom/atom-leadbeater-thumb.webp",
+        "large": "assets/diagrams/the-atom/atom-leadbeater-large.webp"
+      },
+      "images": [
+        {
+          "id": "atom-leadbeater",
+          "title": "Atom (Leadbeater)",
+          "caption": "",
+          "original": "diagrams/the-atom/atom-leadbeater.png",
+          "width": 5760,
+          "height": 3240,
+          "micro": "assets/diagrams/the-atom/atom-leadbeater-micro.webp",
+          "thumb": "assets/diagrams/the-atom/atom-leadbeater-thumb.webp",
+          "large": "assets/diagrams/the-atom/atom-leadbeater-large.webp"
+        }
+      ]
+    },
+    {
+      "id": "evolution",
+      "title": "Evolution",
+      "description": "",
+      "cover": {
+        "id": "colours-associated-with-our-emotions",
+        "title": "Colours Associated with Our Emotions",
+        "caption": "",
+        "original": "diagrams/evolution/colours-associated-with-our-emotions.png",
+        "width": 3840,
+        "height": 2161,
+        "micro": "assets/diagrams/evolution/colours-associated-with-our-emotions-micro.webp",
+        "thumb": "assets/diagrams/evolution/colours-associated-with-our-emotions-thumb.webp",
+        "large": "assets/diagrams/evolution/colours-associated-with-our-emotions-large.webp"
+      },
+      "images": [
+        {
+          "id": "colours-associated-with-our-emotions",
+          "title": "Colours Associated with Our Emotions",
+          "caption": "",
+          "original": "diagrams/evolution/colours-associated-with-our-emotions.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/evolution/colours-associated-with-our-emotions-micro.webp",
+          "thumb": "assets/diagrams/evolution/colours-associated-with-our-emotions-thumb.webp",
+          "large": "assets/diagrams/evolution/colours-associated-with-our-emotions-large.webp"
+        }
+      ]
+    }
+  ]
+}

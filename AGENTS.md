@@ -2,78 +2,32 @@
 
 This file is the working handoff for continuing the Consciousness Atlas in development mode. Read this first, then `docs/ATLAS_SPEC.md` for the full product specification.
 
-## Project intent
+## Project intent and architecture
 
-Build an independent Scientific / Holographic Atlas for technical diagrams about human consciousness. It lives beside an existing WordPress site and must remain decoupled from WordPress.
+Build an independent Scientific / Holographic Atlas for technical diagrams about human consciousness. The September 2026 technical pivot replaces the dynamic backend with a static GitHub Pages site. Do not reintroduce PHP, Apache configuration, request-time image processing, directory scanning endpoints, a database or WordPress dependencies.
 
-Deployment target:
+Current version: **v0.4**. The old specifications/backend are archived in `backups/pre-github-pages-2026-09-20.tar.gz`. Archives are never published.
 
-```text
-example.com/              existing WordPress site, unchanged
-example.com/atlas/        this independent atlas
-```
-
-Do **not** turn this into a WordPress plugin, theme feature, database-backed CMS, or framework-heavy app unless the user explicitly changes direction.
-
-## Current version / status
-
-Current implementation: **v0.2**.
-
-The project already contains:
-
-- static `index.html` shell;
-- `assets/css/atlas.css` visual system;
-- `assets/js/atlas.js` interaction / semantic zoom engine;
-- `catalog.php` production read-only catalog scanner;
-- `image.php` production lazy WebP derivative generator;
-- `dev-server.mjs` dependency-free local Node server and `/catalog.json` provider;
-- sample image groups under `images/`;
-- security `.htaccess` files;
-- full specification in `docs/ATLAS_SPEC.md`;
-- deployment notes in `docs/DEPLOYMENT.md`.
-
-Six sample top-level groups are currently present:
-
-1. Trust in Self
-2. Will to Sacrifice
-3. Faithfulness
-4. Uprightness
-5. Reticence
-6. Impersonality
-
-The production concept expects **16 top-level groups**. The current six are enough to test a single top-level generation and multi-generation diagram behavior inside each group.
+- `diagrams/<category>/`: original content and `folder.json` metadata.
+- `docs/Knowledge Atlas Folder Structure.pages`: source taxonomy and starter artwork.
+- `atlas.json`: generated runtime catalog with stable IDs and relative asset URLs.
+- `assets/diagrams/`: generated WebP derivatives.
+- `_site/`: allowlisted static deployment artifact.
+- `.github/workflows/`: PR checks and main-branch Pages deployment.
 
 ## Local development
 
-Requirements: Node.js 18+.
-
-From the project root:
+Use Node.js 22 or newer:
 
 ```bash
+npm ci
+npm test
+npm run build
 npm start
+# http://127.0.0.1:8080
 ```
 
-Open:
-
-```text
-http://127.0.0.1:8080
-```
-
-Local development intentionally requires no PHP and no npm dependencies.
-
-Catalog lookup order in `atlas.js`:
-
-```text
-catalog.php
-  -> if unavailable
-catalog.json
-  -> if unavailable
-built-in demo catalog
-```
-
-Under Node, `dev-server.mjs` dynamically generates `/catalog.json` by scanning `/images/`.
-
-Important local limitation: Node dev mode currently points `micro`, `thumb`, and `large` to the original image. Production PHP uses optimized WebP derivatives.
+Sharp is an authorized build-only development dependency. There are no browser/runtime package dependencies. The local server serves `_site/`; rebuild after changing sources. The browser fetches only `atlas.json`, with no dynamic or demo fallback. Preserve support for repository subpaths and custom-domain roots.
 
 ## Agreed visual direction
 
@@ -83,7 +37,7 @@ Core visual rules:
 
 - dark scientific field;
 - a finished holographic **human head / brain**, not a generic placeholder shape;
-- head remains SVG for now;
+- head uses supplied front, three-quarter and profile raster artwork from `assets/artwork/manifest.json`;
 - front perspective at top-level categories;
 - profile perspective after entering a category;
 - large image-containing chambers are rounded / oval / lens-like, not rectangular cards;
@@ -116,7 +70,7 @@ Current anchor arrays live in `assets/js/atlas.js`:
 - `FRONT_ANCHORS`
 - `PROFILE_ANCHORS`
 
-If visual tuning changes the head SVG geometry, update those anchor maps as part of the same change.
+If visual tuning changes the head artwork geometry, update those anchor maps as part of the same change.
 
 ## Semantic zoom model
 
@@ -149,7 +103,7 @@ next 6 dominant while prior generations shrink further
 ...continue as needed for large folders
 ```
 
-Several sample groups contain 20–30+ images, so this can be tested now.
+Category counts are data-driven; add fixtures when testing multiple generations.
 
 ## Interaction model
 
@@ -212,7 +166,7 @@ Required behavior already implemented:
 - **COPY PERMANENT LINK** copies a stable `?diagram=<category>/<diagram>` URL;
 - opening that URL loads the matching diagram directly in detail mode;
 - **FULL SCREEN VIEW** button opens the image in a viewport-filling dark overlay;
-- image uses `object-fit: contain`, never crop;
+- fullscreen image uses `object-fit: contain`, never crop; detail retains its 5:4 oval presentation;
 - visible **CLOSE ×** control;
 - clicking the dark backdrop closes it;
 - Escape closes fullscreen;
@@ -220,69 +174,20 @@ Required behavior already implemented:
 
 Do not remove the fullscreen inspection control.
 
-## Content / category cover rules
+## Content and offline build rules
 
-Each directory under `/images/` is one top-level category.
+Each category directory under `diagrams/` has required `folder.json` metadata. Category and diagram IDs are explicit stable lowercase slugs, independent of titles, filenames and sort order. See `docs/IMAGE_WORKFLOW.md` for the exact schema and contribution steps.
 
-Optional `folder.json`:
-
-```json
-{
-  "title": "Mental Consciousness",
-  "order": 3,
-  "cover": "04-mental-structure.png",
-  "description": "Optional short description."
-}
-```
-
-Cover selection priority must remain deterministic:
-
-1. `folder.json` `cover`;
-2. `00-cover.png|jpg|jpeg|webp`;
-3. first naturally sorted image.
-
-Never randomly select a category cover.
-
-## Catalog architecture
-
-### Production
-
-`catalog.php` is intentionally narrow and read-only.
-
-Requirements:
-
-- no request parameters;
-- hard-coded `/images/` root;
-- ignore hidden files and symlinks;
-- allowlist supported image extensions;
-- no absolute filesystem paths in JSON;
-- metadata read only with JSON parsing;
-- no writes.
-
-### Local Node fallback
-
-`dev-server.mjs` must continue to provide `/catalog.json` so the project can be tested locally without PHP.
-
-Do not replace this with a manually maintained `catalog.json`; the Node route should dynamically scan the same `/images/` structure used by PHP.
-
-## Image derivative strategy
-
-Original images can be PNG/WebP/JPEG around 2–4 MB and must not all be loaded into the atlas at full resolution.
-
-Production derivative presets:
+`npm run build:atlas` validates sources and writes `atlas.json` plus `assets/diagrams/` derivatives. `npm run build` additionally assembles `_site/`. The catalog exposes original, micro, thumb and large URLs; all must be relative to support GitHub Pages project paths. Covers are explicit and deterministic.
 
 | preset | max dimension | usage |
 |---|---:|---|
-| `micro` | 320 px | tiny historical/context nodes |
-| `thumb` | 640 px | previous generation / small nodes |
-| `large` | 1600 px | dominant active oval chambers |
+| micro | 320 px | tiny historical/context nodes |
+| thumb | 640 px | previous generation / small nodes |
+| large | 1600 px | dominant active oval chambers |
 | original | unchanged | detail + fullscreen |
 
-`image.php` lazily creates WebP derivatives under `/cache/` only when requested. Cached files should then be served statically by Apache on subsequent requests.
-
-Do not allow arbitrary image dimensions via query parameters. Only named presets are allowed.
-
-Source file modification time invalidates an older cached derivative.
+Sharp generates WebP assets before publication, retaining aspect ratio and avoiding enlargement. The published app never computes derivatives. Do not hand-edit generated `atlas.json` or generated WebP files.
 
 ## Image loading / performance rules
 
@@ -299,64 +204,22 @@ During semantic scroll, animate geometry primarily through position, size/scale,
 
 Keep holographic vignette, tint, scan texture and HUD overlays mostly static CSS/SVG layers.
 
-## Security constraints
+## Build and workflow constraints
 
-The security model is intentionally simple and should not be broadened casually.
-
-`image.php`:
-
-- local source files only;
-- source must resolve beneath `/images/`;
-- no remote URL support;
-- allowlisted extensions only;
-- named presets only;
-- pixel-count limit;
-- file locking around derivative creation;
-- output only beneath `/cache/`.
-
-`/images/` and `/cache/`:
-
-- directory listing disabled;
-- executable script extensions denied;
-- no PHP upload endpoint exists; content is added through file manager/SFTP.
+Validate metadata and local image references; reject duplicate IDs, unsafe paths, unsupported images and symlinks. Publish only the explicit `_site/` allowlist, never backups, source metadata or tooling. PRs run tests/build with read-only permissions. Deployment runs from main with Pages/OIDC permissions isolated to its deploy job. Never use privileged `pull_request_target` to run contributed code.
 
 ## Important implementation files
 
-```text
-index.html
-  visual shell, head SVGs, detail/fullscreen markup
-
-assets/js/atlas.js
-  catalog loading
-  layout arrays
-  semantic depth interpolation
-  desktop/touch controls
-  image resolution selection
-  connector drawing
-  category/diagram/detail state
-
-assets/css/atlas.css
-  holographic visual language
-  oval chambers
-  image vignette / scan texture
-  head styling
-  detail and fullscreen styling
-
-catalog.php
-  production catalog discovery
-
-image.php
-  lazy derivative generation
-
-dev-server.mjs
-  local static server + dynamic catalog.json provider
-
-docs/ATLAS_SPEC.md
-  product/source-of-truth specification
-
-docs/DEPLOYMENT.md
-  deployment notes
-```
+- `index.html`: shell, detail/fullscreen and search markup.
+- `assets/js/atlas.js`: semantic state, layout, rendering and controls.
+- `assets/js/atlas-catalog.js`: static catalog and permanent links.
+- `assets/js/atlas-search.js`: title autocomplete.
+- `assets/css/atlas.css`: holographic visual design.
+- `scripts/`: source validation and static image/site generation.
+- `dev-server.mjs`: static preview server.
+- `docs/ATLAS_SPEC.md`: product/source-of-truth specification.
+- `docs/IMAGE_WORKFLOW.md`: GitHub/LLM content authoring workflow.
+- `docs/DEPLOYMENT.md`: Pages setup and publishing.
 
 ## Known tuning areas / next work
 
@@ -364,15 +227,15 @@ Do not jump ahead to new features before testing the current experience with the
 
 Priority tuning work:
 
-1. Test v0.2 with the supplied real sample groups in Chrome/Safari/Firefox.
+1. Test v0.4 with the imported categories in Chrome/Safari/Firefox.
 2. Tune the holographic image vignette so dense technical diagrams remain readable.
 3. Tune brightness/contrast/saturation specifically against the real source artwork.
 4. Tune desktop large-node geometry and negative-space placement.
 5. Tune phone portrait geometry and ensure large nodes remain readable.
 6. Test continuous wheel sensitivity separately on mouse wheel and trackpad.
-7. Add the remaining ten category folders and validate the complete top-level `6 -> 6 -> 4` sequence.
+7. Verify the imported taxonomy and add real diagrams; category count is not fixed.
 8. Consider category-specific head perspective / anchor metadata only after the base interaction is stable.
-9. Validate production derivative generation on a host with Imagick or GD/WebP; the current execution environment used during creation did not have that PHP image stack available.
+9. Validate the generated site and permanent links under the actual GitHub Pages repository path.
 
 ## User feedback that caused the v0.2 revision
 
@@ -380,7 +243,7 @@ These are explicit product decisions and should not regress:
 
 - previous head hologram looked like only a shape -> replace with a finished layered holographic head/brain;
 - connector lines meeting in the center were wrong -> each line must use a different head/brain anchor;
-- local testing needed a JS/Node alternative to PHP catalog -> keep dynamic Node `/catalog.json` provider;
+- local and production now use the same prebuilt static catalog and image assets;
 - depth transitions changed abruptly -> keep continuous depth interpolation;
 - remove `未来` -> do not reintroduce it;
 - diagram detail needed a fullscreen view and close control -> keep both.
@@ -396,11 +259,6 @@ When changing layout arrays or anchor maps, test both:
 - desktop width > 760 px;
 - mobile width <= 760 px.
 
-When changing catalog/image handling, preserve both modes:
+When changing catalog/image handling, validate the offline build and both root/subpath static hosting. Do not add frameworks, bundlers, databases or browser/runtime dependencies for convenience. Node/Sharp build tooling is explicitly authorized by the static publishing pivot.
 
-- local Node development without PHP;
-- production Apache/PHP with cached derivatives.
-
-Do not introduce a framework, bundler, database, WordPress dependency, or npm runtime dependency just for convenience. The current portability and low-maintenance deployment model are intentional constraints.
-
-If a requested change appears to require any prohibited dependency, stop and ask the user to explicitly confirm a direction change before proceeding.
+Never commit, push or merge without explicit user confirmation. Show the diff/status first.

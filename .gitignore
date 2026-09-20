@@ -1,10 +1,8 @@
-cache/micro/*
-cache/thumb/*
-cache/large/*
-!cache/micro/.keep
-!cache/thumb/.keep
-!cache/large/.keep
 .DS_Store
-execution
-images
-
+execution/
+node_modules/
+_site/
+# Generated from diagrams/ by npm run build.
+assets/diagrams/
+# Local reference document exceeds GitHub's single-file limit; provenance is recorded in docs/CONTENT_IMPORT.md.
+docs/Knowledge Atlas Folder Structure.pages

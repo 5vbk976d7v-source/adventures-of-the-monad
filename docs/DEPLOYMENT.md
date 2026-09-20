@@ -1,91 +1,38 @@
-# Consciousness Atlas — Deployment
+# Consciousness Atlas — Static deployment
 
-## Local development with Node.js
+The atlas runs on GitHub Pages without a backend. Node.js 22+ and Sharp are needed only before publication. The browser reads `atlas.json` and prebuilt image assets.
 
-PHP is not required locally.
-
-Requirements: Node.js 18+.
+## Local preview
 
 ```bash
-cd consciousness-atlas
+npm ci
+npm test
+npm run build
 npm start
 ```
 
-Open:
+Open `http://127.0.0.1:8080`. The server serves `_site/`, the same directory uploaded to Pages. Rebuild after changing application files, source images or metadata. `npm run build:atlas` regenerates only the catalog and image derivatives; `npm run build` also assembles the published site. To test a repository prefix, start with `BASE_PATH=/aom-atlas npm start` and open `/aom-atlas/`.
 
-```text
-http://127.0.0.1:8080
-```
+## GitHub Pages setup
 
-The development server exposes `/catalog.json` by scanning `/images/`. `atlas.js` first tries `catalog.php`; when that endpoint is unavailable under Node it automatically falls back to `catalog.json`.
+1. In the repository's **Settings → Pages**, choose **GitHub Actions** as the build/deployment source.
+2. Review `.github/workflows/pages.yml`. It publishes on pushes to `main`, or a manual dispatch on `main`. For another publishing branch, change the trigger and deployment condition together.
+3. Ensure the `github-pages` environment permits that branch; keep any desired reviewer protection.
+4. Merge the reviewed changes. The workflow installs lockfile dependencies, tests, builds `_site/`, uploads that artifact and deploys it.
+5. Open the URL reported by the deployment job. Check a category, title search, detail link, fullscreen and representative images.
 
-In Node development mode all `micro`, `thumb`, and `large` URLs point to the original image. This keeps local setup dependency-free. Production PHP uses optimized WebP derivatives.
+Repository settings must be applied by an administrator; adding workflow files alone does not enable Pages. This follows GitHub's [custom Pages workflow guidance](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
 
-## Production deployment beside WordPress
+## Paths and permanent links
 
-Upload the entire `consciousness-atlas/` directory next to the WordPress installation, for example:
+The same output supports `https://owner.github.io/repository/` and a custom domain root. Asset paths are relative; no hard-coded repository name or rewrite rule is required. A detail URL uses the current page path and `?diagram=<category-id>/<diagram-id>`; query strings require no SPA routing fallback.
 
-```text
-public_html/
-  wp-admin/
-  wp-content/
-  wp-includes/
-  ...
-  atlas/
-```
+IDs are permanent identifiers. Changing them breaks shared links. Titles, filenames and display order may change without changing IDs.
 
-The atlas is then available at:
+## Publication boundary
 
-```text
-https://example.com/atlas/
-```
+Only `_site/` is published: the browser entrypoint, assets, catalog and referenced originals. Never upload the repository root, which contains documentation, metadata, tooling and historical backups.
 
-No WordPress plugin or theme edit is required.
+PR checks use a read-only token and cannot deploy. Only the deployment job has `pages: write` and `id-token: write`. No personal access token, processing server or writable cache is needed.
 
-## Required PHP/server capabilities
-
-- PHP 8+
-- Apache rewrite support / `.htaccess` support
-- Imagick recommended, or GD compiled with WebP support
-- write permission for PHP only under `/atlas/cache/`
-
-The `/images/` folder only needs to be readable by the web server.
-
-## Adding content
-
-Upload original images into category folders under `/atlas/images/`.
-
-Optional `folder.json`:
-
-```json
-{
-  "title": "Trust in Self",
-  "order": 1,
-  "cover": "00-cover.webp"
-}
-```
-
-After upload:
-
-- `catalog.php` discovers the file automatically;
-- the first request for a missing derivative creates it lazily;
-- later requests are served directly from `/cache/`;
-- replacing an original with a newer file invalidates older derivatives by modification time.
-
-## Permissions
-
-Typical permissions:
-
-```text
-directories  755
-files        644
-cache/       writable by PHP/web-server user
-```
-
-Do not make the full atlas directory globally writable.
-
-## Security notes
-
-The PHP catalog accepts no path/query input. `image.php` accepts only a preset and a source path that resolves beneath `/images/`; it does not accept remote URLs or arbitrary dimensions.
-
-Both `/images/.htaccess` and `/cache/.htaccess` disable indexes and deny executable script extensions.
+The old backend/specification is retained in `backups/pre-github-pages-2026-09-20.tar.gz`, excluded from publication. The active project has no PHP or Apache configuration. For content changes, follow [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md).

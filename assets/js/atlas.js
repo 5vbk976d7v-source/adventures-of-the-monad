@@ -213,7 +213,7 @@ import { createDiagramSearch } from './atlas-search.js';
 
   function currentItems() {
     if (!catalog) return [];
-    if (mode === 'categories') return catalog.collections.slice(0, 16);
+    if (mode === 'categories') return catalog.collections;
     if (mode === 'diagrams' && activeCategory) return activeCategory.images || [];
     return [];
   }
@@ -344,9 +344,14 @@ import { createDiagramSearch } from './atlas-search.js';
   }
 
   function nodeCode(item, index) {
-    if (mode === 'categories') return `FIELD ${safeText(item.id, String(index + 1).padStart(2, '0'))}`;
-    const cat = safeText(activeCategory?.id, '00');
+    if (mode === 'categories') return `FIELD ${String(index + 1).padStart(2, '0')}`;
+    const cat = categoryDisplayCode();
     return `PLATE ${cat}.${String(index + 1).padStart(2, '0')}`;
+  }
+
+  // Display positions are separate from permanent content IDs used in links.
+  function categoryDisplayCode() {
+    return String((catalog?.collections.indexOf(activeCategory) ?? -1) + 1).padStart(2, '0');
   }
 
   function nodeTitle(item, index) {
@@ -399,6 +404,8 @@ import { createDiagramSearch } from './atlas-search.js';
     nodesEl.hidden = false;
     detailEl.hidden = true;
     root.classList.remove('is-detail');
+    emptyEl.hidden = currentItems().length > 0;
+    emptyEl.textContent = mode === 'diagrams' ? 'No diagrams in this category yet.' : 'No categories published yet.';
     nodeMap.clear();
     const fragment = document.createDocumentFragment();
 
@@ -691,7 +698,7 @@ import { createDiagramSearch } from './atlas-search.js';
     nodesEl.hidden = true;
     detailEl.hidden = false;
     connections.replaceChildren();
-    const catId = safeText(activeCategory?.id, '00');
+    const catId = categoryDisplayCode();
     detailCode.textContent = `DIAGRAM ${catId}.${String(index + 1).padStart(2,'0')}`;
     detailTitle.textContent = nodeTitle(activeDiagram, index);
     detailCaption.textContent = safeText(activeDiagram?.caption, safeText(activeCategory?.description, ''));
@@ -1059,5 +1066,9 @@ import { createDiagramSearch } from './atlas-search.js';
     setHeadPerspective('categories');
     buildNodes();
     openDiagramFromLink();
+  }).catch(error => {
+    emptyEl.textContent = 'The atlas could not be loaded. Please try refreshing the page.';
+    emptyEl.hidden = false;
+    console.error(error);
   });
 })();

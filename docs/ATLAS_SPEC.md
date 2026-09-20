@@ -1,12 +1,12 @@
 # Consciousness Atlas — Product & Interaction Specification
 
-Version: 0.3
+Version: 0.4 — static publishing
 
 Status: active implementation
 
 ## 1. Purpose
 
-The atlas is an independent immersive visual application for presenting technical diagrams about human consciousness. It lives beside the existing WordPress website rather than inside WordPress.
+The atlas is an independent immersive visual application for presenting technical diagrams about human consciousness. It runs as a static GitHub Pages site, independent of the existing WordPress website.
 
 The primary metaphor is **semantic depth**: visitors do not browse conventional pages or grids; they move into and out of a holographic map of consciousness.
 
@@ -16,77 +16,30 @@ The project must not use Japanese decorative characters or unrelated sci-fi insc
 
 ## 2. Deployment architecture
 
-```text
-example.com/              WordPress (unchanged)
-example.com/atlas/        independent static/PHP atlas
-```
-
-The atlas has no WordPress API, plugin, database, theme, or build dependency.
+The browser loads static HTML, CSS, JavaScript, artwork and `atlas.json`. No request computes an image or lists a directory. GitHub Pages project paths and custom-domain roots are both supported through relative asset URLs.
 
 ```text
-/atlas/
+diagrams/<category>/     original images and folder.json source metadata
+scripts/                 validation and offline image/catalog build
+assets/                  browser code and holographic artwork
+_site/                   generated deployment artifact
   index.html
-  catalog.php
-  image.php
-  dev-server.mjs
-  package.json
-  .htaccess
+  atlas.json
   assets/
-    css/atlas.css
-    js/atlas.js
-    svg/
-  images/
-    01-category-name/
-    ...
-    16-category-name/
-  cache/
-    micro/
-    thumb/
-    large/
-  docs/
+  diagrams/
 ```
 
-The entire `/atlas/` directory is portable to another normal PHP/Apache host.
+Node.js and Sharp are build tools only. The published site has no server runtime, database, PHP, Apache configuration or WordPress dependency. The local static server serves the same generated artifact used in production. Only `_site/` is uploaded; source documentation, backup archives and tooling are excluded.
+
+The pre-pivot specification and backend are preserved in `backups/pre-github-pages-2026-09-20.tar.gz`.
 
 ## 3. Content model
 
-The production atlas contains **16 top-level consciousness groups**.
+`docs/Knowledge Atlas Folder Structure.pages` supplies the category taxonomy. Source category directories live under `diagrams/`; category metadata and explicitly listed diagrams live in each `folder.json`. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for the authoring schema and agent workflow.
 
-Recommended folder naming:
+Each category and diagram has an explicit stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. Covers are selected explicitly in metadata and must reference a real local source image. A cover may also be the category's example diagram.
 
-```text
-01-physical-consciousness/
-02-emotional-consciousness/
-...
-16-.../
-```
-
-Each folder contains the original diagrams. Numeric filename prefixes may determine diagram order:
-
-```text
-001-introduction.png
-002-mental-consciousness.png
-003-self-consciousness.png
-```
-
-Each folder may contain an optional `folder.json`:
-
-```json
-{
-  "title": "Emotional Consciousness",
-  "order": 4,
-  "cover": "001-emotional-consciousness.png",
-  "description": "Optional short description."
-}
-```
-
-Category cover selection priority:
-
-1. explicit `cover` in `folder.json`;
-2. `00-cover.png|jpg|jpeg|webp`;
-3. first naturally sorted image.
-
-No random cover selection is allowed.
+The generated `atlas.json` is the browser's sole catalog. It contains the complete ordered category/diagram list and relative URLs for original, micro, thumb and large assets. Regenerate it from source metadata rather than editing generated JSON. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
 
 ## 4. Main atlas composition
 
@@ -133,7 +86,7 @@ Front and profile head perspectives use different anchor maps.
 
 ## 6. Top-level category semantic zoom
 
-The 16 categories are revealed in three depth stages, but transition between those stages is continuous.
+Categories are revealed six at a time; transitions between stages are continuous. The examples below illustrate a 16-category catalog, not a fixed category limit.
 
 ### Depth 1
 
@@ -235,7 +188,7 @@ The HUD also provides a title search across all catalogued diagrams. Matching ti
 
 Original diagrams may be PNG/WebP/JPEG files around 2–4 MB. Originals are retained as masters but are not used for ordinary production atlas nodes.
 
-Each source image receives lazily generated WebP derivatives:
+Each source image receives WebP derivatives during the offline build, before publication:
 
 | derivative | max dimension | purpose | target scale |
 |---|---:|---|---|
@@ -246,101 +199,34 @@ Each source image receives lazily generated WebP derivatives:
 
 The JavaScript swaps image resolution according to the current displayed node size. Future/hidden nodes do not load image data until they approach visibility.
 
-## 12. Automatic derivative generation
+## 12. Offline derivative generation
 
-`image.php` handles lazy derivative generation outside WordPress.
+`npm run build` validates source metadata and images, generates the three fixed WebP sizes with Sharp and assembles `_site/`, including originals for detail/fullscreen. Resizing preserves image proportions and does not enlarge small sources. Rebuilding regenerates the catalog and assets from current inputs; requests never mutate the site.
 
-```text
-Browser requests /cache/large/04/001-map.png.webp
-             ↓
-file already exists? ── yes → Apache serves static WebP
-             │
-             no
-             ↓
-.htaccess routes request to image.php
-             ↓
-validate source + preset
-             ↓
-generate WebP once
-             ↓
-save in /cache/
-             ↓
-subsequent requests bypass PHP
-```
+## 13. Catalog and local preview
 
-A newer source file invalidates the old derivative based on modification time and causes regeneration.
-
-Preferred server library: Imagick. GD + WebP is supported as fallback.
-
-## 13. Catalog providers
-
-### Production PHP provider
-
-`catalog.php` is a parameterless, read-only scanner.
-
-It:
-
-- scans only `/images/`;
-- discovers category folders automatically;
-- sorts folders/images naturally;
-- reads optional `folder.json`;
-- applies deterministic cover selection;
-- returns original + micro + thumb + large URLs;
-- returns source dimensions where available;
-- never writes files;
-- accepts no filesystem path from the client.
-
-### Local Node.js provider
-
-Local development must not require PHP.
-
-`dev-server.mjs`:
-
-- serves the static atlas using built-in Node.js modules only;
-- exposes `/catalog.json` by scanning the same `/images/` structure;
-- returns the original image URL for all resolution fields in development mode;
-- has no package dependencies.
-
-`atlas.js` loads providers in this order:
-
-```text
-catalog.php
-   ↓ if unavailable
-catalog.json
-   ↓ if unavailable
-built-in placeholder/demo catalog
-```
-
-Local launch:
+`assets/js/atlas-catalog.js` fetches relative `atlas.json`. Missing or invalid catalog data must be visible as an error; no demo catalog should conceal a publishing failure.
 
 ```bash
+npm ci
+npm run build
 npm start
 # http://127.0.0.1:8080
 ```
 
-## 14. Security requirements
+After changing originals or metadata, rebuild before previewing. Source content and generated URLs must work under a repository path as well as at the domain root.
 
-### Catalog
+## 14. Validation and publishing
 
-- no request parameters;
-- fixed filesystem root;
-- ignore hidden files and symlinks;
-- allowlist image extensions only;
-- never expose absolute server paths;
-- parse metadata as JSON only; never include/execute metadata files.
+- Parse source metadata as JSON, never executable code.
+- Accept supported local image formats only; reject unsafe paths, symlinks, duplicate IDs and missing image references.
+- Limit decoded source dimensions and use only the fixed derivative presets.
+- Include only public site assets in the deployment artifact.
+- Pull requests run validation/build with a read-only repository token; they cannot deploy.
+- Main-branch publishing uses the GitHub Pages artifact/deployment actions. Only the deployment job receives Pages/OIDC write permissions.
+- Never run pull-request code using privileged `pull_request_target` workflows.
 
-### Image derivative service
-
-- only named presets (`micro`, `thumb`, `large`);
-- no arbitrary dimensions;
-- only local files resolving beneath `/images/`;
-- no remote URLs;
-- allowlist image formats;
-- pixel-count limit;
-- file locking prevents duplicate simultaneous regeneration;
-- generated content only beneath `/cache/`;
-- executable file types denied in `/images/` and `/cache/`;
-- directory indexes disabled.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for repository setup and [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for content changes.
 
 ## 15. Animation/performance constraints
 
@@ -359,32 +245,15 @@ Connections are redrawn against stored node geometry and distinct head anchor po
 
 `prefers-reduced-motion` is respected.
 
-## 16. Current implementation status — v0.3
+## 16. Current implementation status — v0.4
 
-Implemented:
+The app retains continuous semantic depth, asymmetric oval chambers, supplied holographic artwork and head transitions, distinct connection anchors, pointer/touch controls, title autocomplete, permanent detail links, fullscreen inspection and the two graded depth meters.
 
-- independent static/PHP atlas;
-- six-at-a-time semantic-depth model;
-- continuous smooth interpolation between depth stages;
-- asymmetric oval chambers with variable sizes;
-- interstitial small/tiny historical nodes;
-- supplied front/three-quarter/profile head artwork, reversible turning transition and desktop parallax;
-- distinct connection anchors across the hologram;
-- desktop hover/click + wheel semantic zoom;
-- mobile tap/tap-again + vertical swipe;
-- diagram detail mode;
-- viewport-filling diagram view with close control;
-- PHP catalog provider;
-- Node.js local catalog fallback/server;
-- lazy WebP derivative architecture;
-- secured read-only catalog/image pipeline;
-- six supplied sample groups integrated for development.
+Publishing now builds static assets and `atlas.json` ahead of time for GitHub Pages. The old dynamic backend and sample taxonomy are retired; the Pages document defines the replacement source categories.
 
 ## 17. Next steps
 
-1. Evaluate the v0.2 behaviour with the real sample images in a browser.
-2. Tune vignette strength and image brightness against the supplied symbol/diagram artwork.
-3. Tune the six large-node layouts at desktop and phone breakpoints.
-4. Add the remaining ten top-level category folders to validate the complete 6 → 6 → 4 top-level sequence.
-5. Tune wheel sensitivity separately for mouse wheels and high-resolution trackpads if necessary.
-6. Decide whether each category should eventually define its own head perspective/anchor map in metadata.
+1. Review the imported taxonomy and example-image assignments.
+2. Add real diagrams through reviewed content pull requests.
+3. Evaluate diagram readability, depth transitions and controls on desktop and mobile.
+4. Configure GitHub Pages and verify deployed links under the actual repository path.
