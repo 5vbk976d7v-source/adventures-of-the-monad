@@ -1,0 +1,15 @@
+{
+  "id": "comparative-symbolism",
+  "title": "Comparative Symbolism",
+  "order": 13,
+  "description": "",
+  "cover": "01_the-christian-symbolism.png",
+  "images": [
+    {
+      "id": "the-christian-symbolism",
+      "title": "The Christian Symbolism",
+      "file": "01_the-christian-symbolism.png",
+      "caption": ""
+    }
+  ]
+}

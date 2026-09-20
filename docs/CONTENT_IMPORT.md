@@ -8,6 +8,8 @@ The document contains **15 distinct source images and 16 image placements**. **E
 
 Category IDs and diagram IDs are explicit stable slugs in each `folder.json`; changing a title does not require changing either ID.
 
+The category directories use the document order as a two-digit prefix (`01_` through `16_`); the provenance paths below refer to the same imported files before that organizational prefix was added.
+
 | Order | Category | Imported original | Pages archive member | SHA-256 |
 |---|---|---|---|---|
 | 1 | Cosmology: How It All Began | `diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes.png` | `Data/metaverse_antverse_universes_final-24.png` | `e619611e3c1e737e1ecf25adcee46944aed019c4805b13a0c1f86e4485593ab3` |

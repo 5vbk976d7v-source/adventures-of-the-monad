@@ -1,0 +1,15 @@
+{
+  "id": "cosmology-how-it-all-began",
+  "title": "Cosmology: How It All Began",
+  "order": 1,
+  "description": "",
+  "cover": "01_metaverse-antverse-and-universes.png",
+  "images": [
+    {
+      "id": "metaverse-antverse-and-universes",
+      "title": "Metaverse, Antverse and Universes",
+      "file": "01_metaverse-antverse-and-universes.png",
+      "caption": ""
+    }
+  ]
+}

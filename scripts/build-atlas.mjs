@@ -6,6 +6,7 @@ import sharp from 'sharp';
 const PRESETS = { micro: 320, thumb: 640, large: 1600 };
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const IMAGE = /\.(png|jpe?g|webp)$/i;
+const NUMBERED_IMAGE = /^(\d{2})_[^/\\]+\.(png|jpe?g|webp)$/i;
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const urlPath = (...parts) => parts.map(encodeURIComponent).join('/');
 function requiredText(value, label) {
@@ -41,11 +42,16 @@ export async function buildAtlas(root = ROOT) {
     if (!Number.isFinite(metadata.order)) throw new Error(`${id} order must be a finite number`);
     if (!Array.isArray(metadata.images) || !metadata.images.length) throw new Error(`${id} requires images`);
     const ids = new Set();
-    for (const image of metadata.images) {
+    for (const [index, image] of metadata.images.entries()) {
       stableId(image.id, `${id} diagram id`);
       if (ids.has(image.id)) throw new Error(`Duplicate diagram id: ${id}/${image.id}`);
       ids.add(image.id);
       requiredText(image.title, `${id}/${image.id} title`);
+      const numbered = typeof image.file === 'string' && image.file.match(NUMBERED_IMAGE);
+      const expectedPrefix = String(index + 1).padStart(2, '0');
+      if (!numbered || numbered[1] !== expectedPrefix) {
+        throw new Error(`${id}/${image.id}: file must start with ${expectedPrefix}_ and preserve array order`);
+      }
     }
     const files = new Set([...metadata.images.map(image => image.file), metadata.cover]);
     for (const file of files) {

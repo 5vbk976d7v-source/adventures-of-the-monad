@@ -176,7 +176,7 @@ Do not remove the fullscreen inspection control.
 
 ## Content and offline build rules
 
-Each category directory under `diagrams/` has required `folder.json` metadata. Category and diagram IDs are explicit stable lowercase slugs, independent of titles, filenames and sort order. See `docs/IMAGE_WORKFLOW.md` for the exact schema and contribution steps.
+Each category directory under `diagrams/` has required `folder.json` metadata. Category and diagram IDs are explicit stable lowercase slugs, independent of titles, filenames and sort order. Source diagram filenames use a two-digit sequence prefix (`01_`, `02_`, …) matching their `images` array position; the prefix is organizational and does not affect permanent IDs. See `docs/IMAGE_WORKFLOW.md` for the exact schema and contribution steps.
 
 `npm run build:atlas` validates sources and writes `atlas.json` plus `assets/diagrams/` derivatives. `npm run build` additionally assembles `_site/`. The catalog exposes original, micro, thumb and large URLs; all must be relative to support GitHub Pages project paths. Covers are explicit and deterministic.
 

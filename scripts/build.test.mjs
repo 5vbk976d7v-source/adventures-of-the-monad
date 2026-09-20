@@ -12,11 +12,11 @@ async function fixture(t) {
   t.after(() => rm(root, { recursive: true, force: true }));
   const category = path.join(root, 'diagrams', 'sample category');
   await mkdir(category, { recursive: true });
-  const metadata = { id: 'sample', title: 'Sample', order: 1, cover: 'sample image.png',
-    images: [{ id: 'first', title: 'First diagram', file: 'sample image.png' }] };
+  const metadata = { id: 'sample', title: 'Sample', order: 1, cover: '01_sample image.png',
+    images: [{ id: 'first', title: 'First diagram', file: '01_sample image.png' }] };
   const save = () => writeFile(path.join(category, 'folder.json'), JSON.stringify(metadata));
   await save();
-  await sharp({ create: { width: 1800, height: 900, channels: 3, background: '#ade' } }).png().toFile(path.join(category, 'sample image.png'));
+  await sharp({ create: { width: 1800, height: 900, channels: 3, background: '#ade' } }).png().toFile(path.join(category, '01_sample image.png'));
   for (const name of ['css', 'js', 'artwork']) await mkdir(path.join(root, 'assets', name), { recursive: true });
   await writeFile(path.join(root, 'index.html'), '<html></html>');
   return { root, category, metadata, save };
@@ -26,7 +26,7 @@ test('build generates bounded derivatives, stable URLs and deterministic catalog
   const { root } = await fixture(t);
   const catalog = await buildAtlas(root);
   const image = catalog.collections[0].images[0];
-  assert.equal(image.original, 'diagrams/sample%20category/sample%20image.png');
+  assert.equal(image.original, 'diagrams/sample%20category/01_sample%20image.png');
   assert.equal(image.id, 'first');
   assert.deepEqual(catalog.collections[0].cover, image);
   for (const [preset, size] of [['micro', 320], ['thumb', 640], ['large', 1600]]) {
@@ -42,28 +42,28 @@ test('build generates bounded derivatives, stable URLs and deterministic catalog
 
 test('rejects traversal, duplicate IDs and symlinked source images', async t => {
   const { root, category, metadata, save } = await fixture(t);
-  metadata.images[0].file = '../escape.png';
+  metadata.images[0].file = '01_../escape.png';
   await save();
-  await assert.rejects(buildAtlas(root), /same-folder/);
-  metadata.images[0].file = 'sample image.png';
+  await assert.rejects(buildAtlas(root), /file must start/);
+  metadata.images[0].file = '01_sample image.png';
   metadata.images.push({ ...metadata.images[0] });
   await save();
   await assert.rejects(buildAtlas(root), /Duplicate diagram/);
   metadata.images.pop();
   await save();
-  await symlink('sample image.png', path.join(category, 'linked.png'));
-  metadata.images[0].file = 'linked.png';
+  await symlink('01_sample image.png', path.join(category, '01_linked.png'));
+  metadata.images[0].file = '01_linked.png';
   await save();
   await assert.rejects(buildAtlas(root), /no symlinks/);
 });
 
 test('small portrait derivatives honor EXIF orientation without upscaling or changing originals', async t => {
   const { root, category, metadata, save } = await fixture(t);
-  const filename = path.join(category, 'portrait.jpg');
+  const filename = path.join(category, '01_portrait.jpg');
   await sharp({ create: { width: 200, height: 100, channels: 3, background: '#abc' } })
     .withMetadata({ orientation: 6 }).jpeg().toFile(filename);
   const original = await readFile(filename);
-  metadata.cover = metadata.images[0].file = 'portrait.jpg';
+  metadata.cover = metadata.images[0].file = '01_portrait.jpg';
   await save();
   const catalog = await buildAtlas(root);
   const image = catalog.collections[0].images[0];
@@ -88,6 +88,6 @@ test('deployment includes only app assets and referenced originals, excludes met
   const site = await buildSite(root);
   assert.deepEqual((await readdir(site)).sort(), ['.nojekyll', 'assets', 'atlas.json', 'diagrams', 'index.html']);
   assert.deepEqual(await readdir(path.join(site, 'assets', 'js')), ['atlas.js']);
-  assert.deepEqual(await readdir(path.join(site, 'diagrams', 'sample category')), ['sample image.png']);
+  assert.deepEqual(await readdir(path.join(site, 'diagrams', 'sample category')), ['01_sample image.png']);
   await access(path.join(site, 'assets', 'diagrams', 'sample', 'first-large.webp'));
 });

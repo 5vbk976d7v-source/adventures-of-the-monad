@@ -37,7 +37,7 @@ The pre-pivot specification and backend are preserved in `backups/pre-github-pag
 
 `docs/Knowledge Atlas Folder Structure.pages` supplies the category taxonomy. Source category directories live under `diagrams/`; category metadata and explicitly listed diagrams live in each `folder.json`. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for the authoring schema and agent workflow.
 
-Each category and diagram has an explicit stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. Covers are selected explicitly in metadata and must reference a real local source image. A cover may also be the category's example diagram.
+Each category and diagram has an explicit stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. Source diagram filenames begin with a two-digit sequence prefix matching their metadata array position (`01_`, `02_`, …); the prefix organizes files and is not part of the stable ID. Covers are selected explicitly in metadata and must reference a real local source image. A cover may also be the category's example diagram.
 
 The generated `atlas.json` is the browser's sole catalog. It contains the complete ordered category/diagram list and relative URLs for original, micro, thumb and large assets. Regenerate it from source metadata rather than editing generated JSON. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
 
