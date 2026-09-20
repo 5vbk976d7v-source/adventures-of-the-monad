@@ -29,6 +29,7 @@ import { createDiagramSearch } from './atlas-search.js';
   const fullscreenEl = document.getElementById('atlas-fullscreen');
   const fullscreenImage = document.getElementById('atlas-fullscreen-image');
   const fullscreenClose = document.getElementById('atlas-fullscreen-close');
+  let fullscreenClosing = false;
   const emptyEl = document.getElementById('atlas-empty');
   const searchInput = document.getElementById('atlas-search-input');
   const searchResults = document.getElementById('atlas-search-results');
@@ -707,29 +708,40 @@ import { createDiagramSearch } from './atlas-search.js';
     detailImage.alt = nodeTitle(activeDiagram,index);
     contextEl.textContent = `${safeText(activeCategory?.title,'Category')} · ${nodeTitle(activeDiagram,index)}`;
     depthEl.textContent = 'DETAIL';
-    instructionEl.textContent = 'FULL SCREEN FOR THE ORIGINAL · BACK TO RETURN';
+    instructionEl.textContent = 'DOUBLE CLICK IMAGE OR FULL SCREEN FOR ORIGINAL · BACK TO RETURN';
     backBtn.hidden = false;
     const href = buildDiagramLink(activeCategory, activeDiagram);
     if (href) window.history.replaceState(null, '', href);
   }
 
   function openFullscreen() {
-    if (!activeDiagram) return;
+    if (!activeDiagram || fullscreenClosing) return;
     const src = activeDiagram.original || activeDiagram.large || activeDiagram.thumb || '';
     if (!src) return;
     fullscreenImage.src = src;
     fullscreenImage.alt = nodeTitle(activeDiagram, activeDiagramIndex);
     fullscreenEl.hidden = false;
+    fullscreenEl.classList.remove('is-closing');
     document.body.classList.add('atlas-fullscreen-open');
-    fullscreenClose.focus();
+    requestAnimationFrame(() => {
+      fullscreenEl.classList.add('is-open');
+      fullscreenClose.focus();
+    });
   }
 
   function closeFullscreen() {
-    if (fullscreenEl.hidden) return;
-    fullscreenEl.hidden = true;
-    fullscreenImage.removeAttribute('src');
+    if (fullscreenEl.hidden || fullscreenClosing) return;
+    fullscreenClosing = true;
+    fullscreenEl.classList.remove('is-open');
+    fullscreenEl.classList.add('is-closing');
     document.body.classList.remove('atlas-fullscreen-open');
-    detailFullscreenBtn.focus();
+    window.setTimeout(() => {
+      fullscreenEl.hidden = true;
+      fullscreenEl.classList.remove('is-closing');
+      fullscreenImage.removeAttribute('src');
+      fullscreenClosing = false;
+      detailFullscreenBtn.focus();
+    }, 680);
   }
 
   function back() {
@@ -916,6 +928,8 @@ import { createDiagramSearch } from './atlas-search.js';
   stage.addEventListener('wheel', onWheel, { passive: false });
   backBtn.addEventListener('click', back);
   detailFullscreenBtn.addEventListener('click', openFullscreen);
+  detailFullscreenBtn.addEventListener('dblclick', openFullscreen);
+  detailImage.addEventListener('dblclick', openFullscreen);
   detailCopyLinkBtn.addEventListener('click', copyDiagramLink);
   fullscreenClose.addEventListener('click', closeFullscreen);
   fullscreenEl.addEventListener('click', event => {
