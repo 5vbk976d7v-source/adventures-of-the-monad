@@ -58,7 +58,11 @@ export async function syncDiagrams(root) {
       listed.add(image.file);
       await regularFile(path.join(directory, image.file));
     }
-    if (!safeFile(metadata.cover)) throw new Error(`${entry.name}: cover must be a same-folder image filename`);
+    if (!safeFile(metadata.cover) || !files.includes(metadata.cover)) {
+      const firstAvailable = metadata.images.map(image => image.file).find(file => files.includes(file)) || files[0];
+      if (!firstAvailable) throw new Error(`${entry.name}: no image is available for the category cover`);
+      metadata.cover = firstAvailable;
+    }
     await regularFile(path.join(directory, metadata.cover));
     // A separate cover stays a cover, rather than becoming an extra diagram.
     const added = files.filter(file => !listed.has(file) && file !== metadata.cover)

@@ -28,7 +28,7 @@ IDs are stable lowercase slugs. Category IDs are unique across the atlas; diagra
 
 New discoveries append to `images`: numbered uploads sort numerically first, then unnumbered uploads sort by filename. Each entry gets `id`, `title`, `file`, and `caption` using the schema above. The initial title comes from the filename (not image recognition); caption starts empty. ID collisions receive `-2`, `-3`, etc. Existing authored fields and IDs are preserved. A separately referenced cover is excluded from discovery. When a listed image needs a prefix, its `file` and any matching `cover` reference are updated together.
 
-References must be simple filenames in the same category folder: no remote URLs, absolute paths, traversal or symlinks. The cover must exist and may reuse a listed diagram. Originals retain their source bytes for fullscreen. Detail uses an optimized derivative. The build generates micro (320 px), thumb (640 px), medium (960 px) and large (1600 px) WebP variants, preserving proportions without upscaling.
+References must be simple filenames in the same category folder: no remote URLs, absolute paths, traversal or symlinks. The cover normally references an existing image and may reuse a listed diagram. If the cover file is missing, the build repairs `folder.json` by selecting the first available image; an empty category still fails. Originals retain their source bytes for fullscreen. Detail uses an optimized derivative. The build generates micro (320 px), thumb (640 px), medium (960 px) and large (1600 px) WebP variants, preserving proportions without upscaling.
 
 ## Content contribution
 

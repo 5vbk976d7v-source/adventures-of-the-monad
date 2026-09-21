@@ -125,6 +125,16 @@ test('separate cover is not auto-imported and missing references fail without ch
   assert.deepEqual(await readFile(path.join(category, 'folder.json')), before);
 });
 
+test('missing cover automatically falls back to the first available image', async t => {
+  const { root, category, metadata, save } = await fixture(t);
+  metadata.cover = 'deleted-cover.png';
+  await save();
+  const catalog = await buildAtlas(root);
+  const synced = JSON.parse(await readFile(path.join(category, 'folder.json')));
+  assert.equal(synced.cover, '01_sample image.png');
+  assert.equal(catalog.collections[0].cover.id, 'first');
+});
+
 test('duplicate prefixes and invalid uploads fail before numbering or metadata writes', async t => {
   const { root, category, metadata } = await fixture(t);
   const before = await readFile(path.join(category, 'folder.json'));
