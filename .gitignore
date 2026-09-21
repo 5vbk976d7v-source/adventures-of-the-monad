@@ -2,7 +2,4 @@
 execution/
 node_modules/
 _site/
-# Generated from diagrams/ by npm run build.
-assets/diagrams/
-# Local reference document exceeds GitHub's single-file limit; provenance is recorded in docs/CONTENT_IMPORT.md.
-docs/Knowledge Atlas Folder Structure.pages
+# assets/diagrams/ and atlas.json are generated but versioned.

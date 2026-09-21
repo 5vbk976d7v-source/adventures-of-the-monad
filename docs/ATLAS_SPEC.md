@@ -37,9 +37,9 @@ The pre-pivot specification and backend are preserved in `backups/pre-github-pag
 
 `docs/Knowledge Atlas Folder Structure.pages` supplies the category taxonomy. Source category directories live under `diagrams/`; category metadata and explicitly listed diagrams live in each `folder.json`. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for the authoring schema and agent workflow.
 
-Each category and diagram has an explicit stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. Source diagram filenames begin with a two-digit sequence prefix matching their metadata array position (`01_`, `02_`, …); the prefix organizes files and is not part of the stable ID. Covers are selected explicitly in metadata and must reference a real local source image. A cover may also be the category's example diagram.
+Each category and diagram has a stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. The build discovers unlisted originals and appends metadata entries with filename-derived IDs/titles and blank captions. Unnumbered files get the next prefix above the category maximum (`01_`, `02_`, …, `100_`). Existing IDs, numbers, authored metadata and array order remain unchanged; gaps are allowed. Covers are selected explicitly in metadata and must reference a real local source image. A separate cover is not automatically added as a diagram.
 
-The generated `atlas.json` is the browser's sole catalog. It contains the complete ordered category/diagram list and relative URLs for original, micro, thumb and large assets. Regenerate it from source metadata rather than editing generated JSON. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
+The generated `atlas.json` is the browser's sole catalog. It contains the complete ordered category/diagram list and relative URLs for original, micro, thumb, medium and large assets. Regenerate it from source metadata rather than editing generated JSON. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
 
 ## 4. Main atlas composition
 
@@ -172,7 +172,7 @@ Entering a diagram opens a dedicated holographic inspection state.
 
 At this level:
 
-- the original/high-resolution image is loaded;
+- the a size-appropriate optimized derivative is loaded;
 - the diagram is shown in an oval inspection chamber;
 - title/code/caption remain visible;
 - a **COPY PERMANENT LINK** button copies a stable `?diagram=<category>/<diagram>` URL;
@@ -194,14 +194,15 @@ Each source image receives WebP derivatives during the offline build, before pub
 |---|---:|---|---|
 | micro | 320 px | tiny historic/context nodes | ~20–60 KB typical |
 | thumb | 640 px | small prior-generation nodes | ~40–150 KB typical |
+| medium | 960 px | high-density nodes | content-dependent |
 | large | 1600 px | active large oval chambers | ~150–450 KB typical |
-| original | unchanged | final diagram inspection/full-screen | source size |
+| original | unchanged | full-screen inspection | source size |
 
 The JavaScript swaps image resolution according to the current displayed node size. Future/hidden nodes do not load image data until they approach visibility.
 
 ## 12. Offline derivative generation
 
-`npm run build` validates source metadata and images, generates the three fixed WebP sizes with Sharp and assembles `_site/`, including originals for detail/fullscreen. Resizing preserves image proportions and does not enlarge small sources. Rebuilding regenerates the catalog and assets from current inputs; requests never mutate the site.
+`npm run build` synchronizes/validates source metadata and images, generates the four fixed WebP sizes with Sharp and assembles `_site/`, including originals for fullscreen. Resizing preserves image proportions and does not enlarge small sources. `atlas.json`, generated WebP assets and `assets/diagrams/manifest.json` are committed to the repository. Source/settings/output fingerprints allow reuse of unchanged derivatives and regenerate missing, corrupt or stale assets. The manifest is not published. Requests never mutate the site.
 
 ## 13. Catalog and local preview
 
@@ -224,6 +225,7 @@ After changing originals or metadata, rebuild before previewing. Source content 
 - Include only public site assets in the deployment artifact.
 - Pull requests run validation/build with a read-only repository token; they cannot deploy.
 - Main-branch publishing uses the GitHub Pages artifact/deployment actions. Only the deployment job receives Pages/OIDC write permissions.
+- The main build job receives contents-write permission to commit processed originals, metadata, catalog and derivatives before deployment in the source repository `5vbk976d7v-source/adventures-of-the-monad` and temporarily in `jder7/aom-atlas` during QA. The testing mirror lists changes before committing. Versioned `.github/atlas-build.json` enables commits per repository; both entries are currently true. Set the testing entry to false after QA; independent bot commits may require reconciliation between remotes. PR builds never push. Repository-local concurrency serializes publishing; a rejected normal push stops deployment and requires a fresh run.
 - Never run pull-request code using privileged `pull_request_target` workflows.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for repository setup and [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for content changes.
@@ -250,10 +252,3 @@ Connections are redrawn against stored node geometry and distinct head anchor po
 The app retains continuous semantic depth, asymmetric oval chambers, supplied holographic artwork and head transitions, distinct connection anchors, pointer/touch controls, title autocomplete, permanent detail links, fullscreen inspection and the two graded depth meters.
 
 Publishing now builds static assets and `atlas.json` ahead of time for GitHub Pages. The old dynamic backend and sample taxonomy are retired; the Pages document defines the replacement source categories.
-
-## 17. Next steps
-
-1. Review the imported taxonomy and example-image assignments.
-2. Add real diagrams through reviewed content pull requests.
-3. Evaluate diagram readability, depth transitions and controls on desktop and mobile.
-4. Configure GitHub Pages and verify deployed links under the actual repository path.

@@ -11,7 +11,7 @@ Current version: **v0.4**. The old specifications/backend are archived in `backu
 - `diagrams/<category>/`: original content and `folder.json` metadata.
 - `docs/Knowledge Atlas Folder Structure.pages`: source taxonomy and starter artwork.
 - `atlas.json`: generated runtime catalog with stable IDs and relative asset URLs.
-- `assets/diagrams/`: generated WebP derivatives.
+- `assets/diagrams/`: generated, versioned WebP derivatives and incremental-build manifest.
 - `_site/`: allowlisted static deployment artifact.
 - `.github/workflows/`: PR checks and main-branch Pages deployment.
 
@@ -160,7 +160,7 @@ The HUD title search searches all catalogued diagram titles and opens the select
 
 Required behavior already implemented:
 
-- original/high-resolution image is used for detail;
+- detail uses a size-appropriate optimized derivative; originals load on fullscreen entry;
 - diagram is shown in a large oval inspection chamber;
 - title/code/caption remain visible;
 - **COPY PERMANENT LINK** copies a stable `?diagram=<category>/<diagram>` URL;
@@ -176,16 +176,17 @@ Do not remove the fullscreen inspection control.
 
 ## Content and offline build rules
 
-Each category directory under `diagrams/` has required `folder.json` metadata. Category and diagram IDs are explicit stable lowercase slugs, independent of titles, filenames and sort order. Source diagram filenames use a two-digit sequence prefix (`01_`, `02_`, …) matching their `images` array position; the prefix is organizational and does not affect permanent IDs. See `docs/IMAGE_WORKFLOW.md` for the exact schema and contribution steps.
+Each category directory under `diagrams/` has required `folder.json` metadata. Category and diagram IDs are stable lowercase slugs, independent of titles, filenames and sort order. Builds discover unlisted images and append entries with filename-derived titles and blank captions. Unnumbered diagram filenames receive the next unused prefix above the category maximum (`01_`, `02_`, …, `100_`); existing prefixes, authored fields, IDs and array order remain unchanged. See `docs/IMAGE_WORKFLOW.md` for the exact schema and contribution steps.
 
-`npm run build:atlas` validates sources and writes `atlas.json` plus `assets/diagrams/` derivatives. `npm run build` additionally assembles `_site/`. The catalog exposes original, micro, thumb and large URLs; all must be relative to support GitHub Pages project paths. Covers are explicit and deterministic.
+`npm run build:atlas` synchronizes/validates sources and writes `atlas.json` plus `assets/diagrams/` derivatives and manifest. These outputs are versioned. Source/output hashes let unchanged derivatives be reused; missing, corrupt or stale variants regenerate. `npm run build` additionally assembles ignored `_site/`. The catalog exposes original, micro, thumb, medium and large URLs; all must be relative to support GitHub Pages project paths. Covers are explicit and deterministic.
 
 | preset | max dimension | usage |
 |---|---:|---|
 | micro | 320 px | tiny historical/context nodes |
 | thumb | 640 px | previous generation / small nodes |
+| medium | 960 px | high-density nodes |
 | large | 1600 px | dominant active oval chambers |
-| original | unchanged | detail + fullscreen |
+| original | unchanged | fullscreen |
 
 Sharp generates WebP assets before publication, retaining aspect ratio and avoiding enlargement. The published app never computes derivatives. Do not hand-edit generated `atlas.json` or generated WebP files.
 
@@ -193,10 +194,10 @@ Sharp generates WebP assets before publication, retaining aspect ratio and avoid
 
 The JS chooses resolution from rendered node size. Keep that behavior.
 
-- dominant nodes -> `large`;
+- nodes -> smallest sufficient derivative based on rendered pixels, source aspect ratio and DPR (capped at 2);
 - smaller previous generation -> `thumb`;
 - tiny historical nodes -> `micro`;
-- detail/fullscreen -> original.
+- detail -> size-appropriate derivative, capped at large; fullscreen -> original.
 
 Future/invisible nodes should not load unnecessarily.
 
@@ -206,7 +207,7 @@ Keep holographic vignette, tint, scan texture and HUD overlays mostly static CSS
 
 ## Build and workflow constraints
 
-Validate metadata and local image references; reject duplicate IDs, unsafe paths, unsupported images and symlinks. Publish only the explicit `_site/` allowlist, never backups, source metadata or tooling. PRs run tests/build with read-only permissions. Deployment runs from main with Pages/OIDC permissions isolated to its deploy job. Never use privileged `pull_request_target` to run contributed code.
+Validate metadata and local image references; reject duplicate IDs/prefixes, unsafe paths, unsupported images and symlinks. Publish only the explicit `_site/` allowlist, never backups, source metadata, derivative manifest or tooling. PRs run tests/build with read-only permissions. The main build job has contents-write permission to commit/push only diagrams/, assets/diagrams/ and atlas.json in `5vbk976d7v-source/adventures-of-the-monad` and temporarily in `jder7/aom-atlas` during QA; normal pushes fail safely if main advances. `jder7/aom-atlas` lists generated changes before committing. Versioned `.github/atlas-build.json` maps repository names to `commitGenerated` booleans (both currently true). Set the testing entry to false after QA; no repository settings/admin access is needed. Unlisted repositories cannot commit. While both repositories commit, reconcile their independent histories before pushing to both remotes; never force-push automatically. Pages/OIDC permissions remain isolated to its deploy job. Never use privileged `pull_request_target` to run contributed code.
 
 ## Important implementation files
 

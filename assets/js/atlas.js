@@ -1,5 +1,6 @@
 import { buildDiagramLink, clearDiagramLink, findDiagramFromLink, loadCatalog, readDiagramLink, safeText } from './atlas-catalog.js';
 import { createDiagramSearch } from './atlas-search.js';
+import { loadSizedImage } from './atlas-images.js';
 
 (() => {
   'use strict';
@@ -364,26 +365,11 @@ import { createDiagramSearch } from './atlas-search.js';
     return mode === 'categories' ? item.cover : item;
   }
 
-  function sourceFor(item, resolution) {
-    const record = sourceRecord(item);
-    if (!record) return null;
-    if (resolution === 'large') return record.large || record.thumb || record.original;
-    if (resolution === 'thumb') return record.thumb || record.micro || record.large || record.original;
-    return record.micro || record.thumb || record.large || record.original;
-  }
-
-  function desiredResolution(geometry) {
-    if (geometry.w >= (window.innerWidth <= 760 ? 22 : 12)) return 'large';
-    if (geometry.w >= (window.innerWidth <= 760 ? 9 : 5)) return 'thumb';
-    return 'micro';
-  }
-
   function ensureNodeImage(node, item, geometry) {
     const media = node.querySelector('.node__media');
     if (!media || geometry.opacity < .02) return;
-    const resolution = desiredResolution(geometry);
-    const src = sourceFor(item, resolution);
-    if (!src) return;
+    const record = sourceRecord(item);
+    if (!record) return;
 
     let img = media.querySelector('img');
     if (!img) {
@@ -394,11 +380,9 @@ import { createDiagramSearch } from './atlas-search.js';
       img.decoding = 'async';
       media.appendChild(img);
     }
-    if (img.dataset.source !== src) {
-      img.dataset.source = src;
-      img.loading = geometry.w >= 12 ? 'eager' : 'lazy';
-      img.src = src;
-    }
+    img.loading = geometry.w >= 12 ? 'eager' : 'lazy';
+    loadSizedImage(img, record, stage.clientWidth * geometry.w / 100,
+      stage.clientHeight * geometry.h / 100, window.devicePixelRatio);
   }
 
   function buildNodes() {
@@ -703,8 +687,7 @@ import { createDiagramSearch } from './atlas-search.js';
     detailCode.textContent = `DIAGRAM ${catId}.${String(index + 1).padStart(2,'0')}`;
     detailTitle.textContent = nodeTitle(activeDiagram, index);
     detailCaption.textContent = safeText(activeDiagram?.caption, safeText(activeCategory?.description, ''));
-    const src = activeDiagram?.original || activeDiagram?.large || activeDiagram?.thumb || '';
-    detailImage.src = src;
+    updateDetailImage();
     detailImage.alt = nodeTitle(activeDiagram,index);
     contextEl.textContent = `${safeText(activeCategory?.title,'Category')} · ${nodeTitle(activeDiagram,index)}`;
     depthEl.textContent = 'DETAIL';
@@ -712,6 +695,11 @@ import { createDiagramSearch } from './atlas-search.js';
     backBtn.hidden = false;
     const href = buildDiagramLink(activeCategory, activeDiagram);
     if (href) window.history.replaceState(null, '', href);
+  }
+
+  function updateDetailImage() {
+    const visual = detailImage.parentElement;
+    loadSizedImage(detailImage, activeDiagram, visual.clientWidth, visual.clientHeight, window.devicePixelRatio);
   }
 
   function openFullscreen() {
@@ -937,6 +925,7 @@ import { createDiagramSearch } from './atlas-search.js';
   });
 
   window.addEventListener('resize', () => {
+    if (mode === 'detail') updateDetailImage();
     applyScene(true);
   });
 

@@ -1,12 +1,13 @@
-import { readdir, readFile, writeFile, mkdir, lstat, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { syncDiagrams, regularFile } from './sync-diagrams.mjs';
+import { imageAssets, PRESETS } from './image-assets.mjs';
 
-const PRESETS = { micro: 320, thumb: 640, large: 1600 };
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const IMAGE = /\.(png|jpe?g|webp)$/i;
-const NUMBERED_IMAGE = /^(\d{2})_[^/\\]+\.(png|jpe?g|webp)$/i;
+const NUMBERED_IMAGE = /^(\d+)_[^/\\]+\.(png|jpe?g|webp)$/i;
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const urlPath = (...parts) => parts.map(encodeURIComponent).join('/');
 function requiredText(value, label) {
@@ -17,12 +18,9 @@ function stableId(value, label) {
   if (typeof value !== 'string' || !ID.test(value)) throw new Error(`${label} must be a lowercase slug`);
   return value;
 }
-async function regularFile(filename) {
-  if (!(await lstat(filename)).isFile()) throw new Error(`Expected regular file (no symlinks): ${filename}`);
-}
-
-// Metadata is explicit: adding a file alone never changes stable links or catalog ordering.
+// Discover new originals first; existing stable IDs and authored metadata are preserved.
 export async function buildAtlas(root = ROOT) {
+  await syncDiagrams(root);
   const source = path.join(root, 'diagrams');
   if (!(await lstat(source)).isDirectory()) throw new Error('diagrams must be a real directory');
   const entries = (await readdir(source, { withFileTypes: true }))
@@ -42,15 +40,14 @@ export async function buildAtlas(root = ROOT) {
     if (!Number.isFinite(metadata.order)) throw new Error(`${id} order must be a finite number`);
     if (!Array.isArray(metadata.images) || !metadata.images.length) throw new Error(`${id} requires images`);
     const ids = new Set();
-    for (const [index, image] of metadata.images.entries()) {
+    for (const image of metadata.images) {
       stableId(image.id, `${id} diagram id`);
       if (ids.has(image.id)) throw new Error(`Duplicate diagram id: ${id}/${image.id}`);
       ids.add(image.id);
       requiredText(image.title, `${id}/${image.id} title`);
       const numbered = typeof image.file === 'string' && image.file.match(NUMBERED_IMAGE);
-      const expectedPrefix = String(index + 1).padStart(2, '0');
-      if (!numbered || numbered[1] !== expectedPrefix) {
-        throw new Error(`${id}/${image.id}: file must start with ${expectedPrefix}_ and preserve array order`);
+      if (!numbered) {
+        throw new Error(`${id}/${image.id}: file must start with a numeric prefix`);
       }
     }
     const files = new Set([...metadata.images.map(image => image.file), metadata.cover]);
@@ -65,9 +62,11 @@ export async function buildAtlas(root = ROOT) {
   if (!categories.length) throw new Error('No diagram categories found');
   categories.sort((a, b) => a.metadata.order - b.metadata.order || a.metadata.id.localeCompare(b.metadata.id, 'en'));
   const output = path.join(root, 'assets', 'diagrams');
+  if (!(await lstat(path.join(root, 'assets'))).isDirectory()) throw new Error('assets must be a real directory');
   await mkdir(output, { recursive: true });
   // Never traverse a substituted output symlink.
   if (!(await lstat(output)).isDirectory()) throw new Error('assets/diagrams must be a real directory');
+  const assets = await imageAssets(output);
   const collections = [];
   for (const { directory, folder, metadata } of categories) {
     const categoryOutput = path.join(output, metadata.id);
@@ -87,15 +86,9 @@ export async function buildAtlas(root = ROOT) {
         original: urlPath('diagrams', folder, image.file),
         width: swapped ? info.height : info.width, height: swapped ? info.width : info.height
       };
-      for (const [preset, size] of Object.entries(PRESETS)) {
+      await assets.generate(input, categoryOutput, image.id);
+      for (const preset of Object.keys(PRESETS)) {
         const filename = `${image.id}-${preset}.webp`;
-        // Write via a buffer, replacing existing files without following symlinks.
-        const buffer = await sharp(input, options).autoOrient()
-          .resize(size, size, { fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: 90, effort: 5 }).toBuffer();
-        const destination = path.join(categoryOutput, filename);
-        await rm(destination, { force: true });
-        await writeFile(destination, buffer);
         record[preset] = urlPath('assets', 'diagrams', metadata.id, filename);
       }
       recordsByFile.set(image.file, record);
@@ -114,6 +107,7 @@ export async function buildAtlas(root = ROOT) {
       cover, images });
   }
   const catalog = { version: 1, collections };
+  await assets.finish();
   await writeFile(path.join(root, 'atlas.json'), `${JSON.stringify(catalog, null, 2)}\n`);
   return catalog;
 }

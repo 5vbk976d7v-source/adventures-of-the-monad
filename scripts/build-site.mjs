@@ -29,7 +29,7 @@ export async function buildSite(root = ROOT) {
   }
   const urls = new Set();
   for (const category of catalog.collections) for (const image of [category.cover, ...category.images]) {
-    for (const key of ['original', 'micro', 'thumb', 'large']) urls.add(image[key]);
+    for (const key of ['original', 'micro', 'thumb', 'medium', 'large']) urls.add(image[key]);
   }
   for (const url of urls) {
     const relative = url.split('/').map(decodeURIComponent).join(path.sep);
