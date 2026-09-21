@@ -16,6 +16,7 @@ import { loadSizedImage } from './atlas-images.js';
   const depthEl = document.getElementById('atlas-depth');
   const instructionEl = document.getElementById('atlas-instruction');
   const backBtn = document.getElementById('atlas-back');
+  const brandBtn = document.getElementById('atlas-brand');
   const head = document.getElementById('atlas-head');
   const headFront = document.getElementById('head-front');
   const headThreeQuarter = document.getElementById('head-three-quarter');
@@ -385,11 +386,13 @@ import { loadSizedImage } from './atlas-images.js';
       img.addEventListener('load', () => media.classList.remove('is-loading', 'is-error'));
       img.addEventListener('error', () => { media.classList.remove('is-loading'); media.classList.add('is-error'); img.removeAttribute('src'); });
     }
-    media.classList.add('is-loading');
-    media.classList.remove('is-error');
     img.loading = geometry.w >= 12 ? 'eager' : 'lazy';
     loadSizedImage(img, record, stage.clientWidth * geometry.w / 100,
       stage.clientHeight * geometry.h / 100, window.devicePixelRatio);
+    // Node resolution upgrades happen continuously during semantic scrolling;
+    // keep the existing bitmap visible instead of flashing a loading spinner.
+    media.classList.remove('is-loading');
+    if (img.complete && img.naturalWidth > 0) media.classList.remove('is-error');
   }
 
   function buildNodes() {
@@ -468,6 +471,10 @@ import { loadSizedImage } from './atlas-images.js';
       node.style.height = `${g.h}%`;
       node.style.opacity = String(g.opacity);
       node.style.setProperty('--label-opacity', String(clamp(g.label * 1.15, 0, 1)));
+      node.classList.toggle('label-above', g.y + g.h / 2 > 78 || g.y < 35);
+      node.classList.toggle('label-side', g.y < 35 && g.x >= 38 && g.x <= 62);
+      node.classList.toggle('label-left', g.x < 16);
+      node.classList.toggle('label-right', g.x > 84);
       node.style.pointerEvents = g.opacity > .08 && g.w > 1 ? 'auto' : 'none';
       node.dataset.role = g.role;
       node.tabIndex = g.opacity > .08 && g.w > 1 ? 0 : -1;
@@ -774,6 +781,24 @@ import { loadSizedImage } from './atlas-images.js';
     }
   }
 
+  function goHome() {
+    resetWheelIntent();
+    clearTouchGesture();
+    if (!fullscreenEl.hidden) closeFullscreen();
+    clearDiagramLink();
+    mode = 'categories';
+    activeCategory = null;
+    activeDiagram = null;
+    activeDiagramIndex = -1;
+    selectedIndex = null;
+    depth = targetDepth = 0;
+    lastHudStage = -1;
+    diagramSearch.setItems(searchableDiagrams());
+    setHeadPerspective('categories');
+    buildNodes();
+    stage.focus({ preventScroll: true });
+  }
+
   function scheduleAnimation() {
     if (animationFrame) return;
     const tick = () => {
@@ -927,6 +952,7 @@ import { loadSizedImage } from './atlas-images.js';
 
   stage.addEventListener('wheel', onWheel, { passive: false });
   backBtn.addEventListener('click', back);
+  brandBtn.addEventListener('click', goHome);
   detailFullscreenBtn.addEventListener('click', openFullscreen);
   detailFullscreenBtn.addEventListener('dblclick', openFullscreen);
   detailImage.addEventListener('dblclick', openFullscreen);

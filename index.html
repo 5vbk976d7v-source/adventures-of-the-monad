@@ -11,14 +11,17 @@
   <main id="atlas" class="atlas" aria-live="polite">
     <header class="atlas__hud">
       <div>
-        <div class="atlas__brand">ATLAS</div>
+        <button id="atlas-brand" class="atlas__brand" type="button" aria-label="Return to category list">
+          <img src="assets/artwork/ankh_logo.webp" alt="">
+          <span>ATLAS</span>
+        </button>
         <div id="atlas-context" class="atlas__context">Human Consciousness</div>
       </div>
       <div class="atlas__signature" aria-hidden="true">A MAP OF HUMAN CONSCIOUSNESS<span>EXPLORE · UNDERSTAND · EXPAND</span></div>
       <div class="atlas__hud-right">
         <div class="atlas-search" aria-label="Search diagrams">
-          <label class="atlas-search__label" for="atlas-search-input">FIND DIAGRAM</label>
-          <input id="atlas-search-input" class="atlas-search__input" type="search" placeholder="Search titles" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="atlas-search-results" disabled>
+          <label class="atlas-search__label" for="atlas-search-input">SEARCH DIAGRAMS</label>
+          <input id="atlas-search-input" class="atlas-search__input" type="search" placeholder="Search diagrams" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="atlas-search-results" disabled>
           <div id="atlas-search-results" class="atlas-search__results" role="listbox" hidden></div>
         </div>
         <span id="atlas-depth" class="atlas__depth">DEPTH 01</span>
@@ -105,7 +108,7 @@
 
   <div id="atlas-fullscreen" class="atlas-fullscreen" role="dialog" aria-modal="true" aria-label="Full screen diagram" hidden>
     <button id="atlas-fullscreen-close" class="atlas-fullscreen__close" type="button" aria-label="Close full screen image">CLOSE ×</button>
-    <span class="atlas-image-status" aria-live="polite">LOADING ORIGINAL</span>
+    <span class="atlas-image-status" aria-live="polite" aria-label="Loading original diagram"></span>
     <img id="atlas-fullscreen-image" class="atlas-fullscreen__image" alt="">
   </div>
 
