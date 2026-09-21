@@ -215,6 +215,18 @@
           "thumb": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-thumb.webp",
           "medium": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-medium.webp",
           "large": "assets/diagrams/kingdoms-of-nature/group-souls-across-the-kingdoms-consolidation-large.webp"
+        },
+        {
+          "id": "atom-icon-optimized",
+          "title": "Atom icon optimized",
+          "caption": "",
+          "original": "diagrams/07_kingdoms-of-nature/02_atom-icon-optimized.png",
+          "width": 1129,
+          "height": 1129,
+          "micro": "assets/diagrams/kingdoms-of-nature/atom-icon-optimized-micro.webp",
+          "thumb": "assets/diagrams/kingdoms-of-nature/atom-icon-optimized-thumb.webp",
+          "medium": "assets/diagrams/kingdoms-of-nature/atom-icon-optimized-medium.webp",
+          "large": "assets/diagrams/kingdoms-of-nature/atom-icon-optimized-large.webp"
         }
       ]
     },
