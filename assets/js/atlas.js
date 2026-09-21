@@ -380,6 +380,13 @@ import { loadSizedImage } from './atlas-images.js';
       img.decoding = 'async';
       media.appendChild(img);
     }
+    if (!img.dataset.atlasEvents) {
+      img.dataset.atlasEvents = '1';
+      img.addEventListener('load', () => media.classList.remove('is-loading', 'is-error'));
+      img.addEventListener('error', () => { media.classList.remove('is-loading'); media.classList.add('is-error'); img.removeAttribute('src'); });
+    }
+    media.classList.add('is-loading');
+    media.classList.remove('is-error');
     img.loading = geometry.w >= 12 ? 'eager' : 'lazy';
     loadSizedImage(img, record, stage.clientWidth * geometry.w / 100,
       stage.clientHeight * geometry.h / 100, window.devicePixelRatio);
@@ -699,6 +706,8 @@ import { loadSizedImage } from './atlas-images.js';
 
   function updateDetailImage() {
     const visual = detailImage.parentElement;
+    visual.classList.add('is-loading');
+    visual.classList.remove('is-error');
     loadSizedImage(detailImage, activeDiagram, visual.clientWidth, visual.clientHeight, window.devicePixelRatio);
   }
 
@@ -707,6 +716,8 @@ import { loadSizedImage } from './atlas-images.js';
     const src = activeDiagram.original || activeDiagram.large || activeDiagram.thumb || '';
     if (!src) return;
     fullscreenImage.src = src;
+    fullscreenEl.classList.add('is-loading');
+    fullscreenEl.classList.remove('is-error');
     fullscreenImage.alt = nodeTitle(activeDiagram, activeDiagramIndex);
     fullscreenEl.hidden = false;
     fullscreenEl.classList.remove('is-closing');
@@ -727,6 +738,7 @@ import { loadSizedImage } from './atlas-images.js';
       fullscreenEl.hidden = true;
       fullscreenEl.classList.remove('is-closing');
       fullscreenImage.removeAttribute('src');
+      fullscreenEl.classList.remove('is-loading', 'is-error');
       fullscreenClosing = false;
       detailFullscreenBtn.focus();
     }, 680);
@@ -918,6 +930,10 @@ import { loadSizedImage } from './atlas-images.js';
   detailFullscreenBtn.addEventListener('click', openFullscreen);
   detailFullscreenBtn.addEventListener('dblclick', openFullscreen);
   detailImage.addEventListener('dblclick', openFullscreen);
+  detailImage.addEventListener('load', () => detailImage.parentElement.classList.remove('is-loading', 'is-error'));
+  detailImage.addEventListener('error', () => { detailImage.parentElement.classList.remove('is-loading'); detailImage.parentElement.classList.add('is-error'); detailImage.removeAttribute('src'); });
+  fullscreenImage.addEventListener('load', () => fullscreenEl.classList.remove('is-loading', 'is-error'));
+  fullscreenImage.addEventListener('error', () => { fullscreenEl.classList.remove('is-loading'); fullscreenEl.classList.add('is-error'); fullscreenImage.removeAttribute('src'); });
   detailCopyLinkBtn.addEventListener('click', copyDiagramLink);
   fullscreenClose.addEventListener('click', closeFullscreen);
   fullscreenEl.addEventListener('click', event => {

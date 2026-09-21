@@ -45,6 +45,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Verify publish consistency
+        run: node scripts/verify-publish.mjs
       - name: List generated changes in the test repository
         if: github.repository == 'jder7/aom-atlas'
         run: |

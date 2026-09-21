@@ -75,6 +75,9 @@ button{font:inherit;color:inherit}
 .node__media img{position:relative;z-index:0;width:100%;height:100%;display:block;opacity:.96;filter:saturate(.85);-webkit-mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.93) 70%,transparent 100%);mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.93) 70%,transparent 100%)}
 .node__media::before{content:"";position:absolute;z-index:1;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(2,8,13,.045) 52%,rgba(2,8,13,.11) 76%,rgba(2,8,13,.18) 100%);mix-blend-mode:multiply;pointer-events:none}
 .node__media::after{content:"";position:absolute;z-index:2;inset:0;background:repeating-linear-gradient(to bottom,transparent 0 4px,rgba(145,221,255,.025) 5px 6px);pointer-events:none}
+.node__media.is-loading img{opacity:.32}
+.node__media.is-loading::after{background:radial-gradient(circle,transparent 0 9px,rgba(159,223,251,.72) 10px 11px,transparent 12px),repeating-linear-gradient(to bottom,transparent 0 4px,rgba(145,221,255,.025) 5px 6px);animation:atlas-spinner 1s linear infinite}
+.node__media.is-error::after{content:"IMAGE UNAVAILABLE";display:grid;place-items:center;color:rgba(183,218,235,.76);font-size:7px;letter-spacing:.16em;background:radial-gradient(ellipse,rgba(78,139,169,.18),transparent 68%)}
 .node__placeholder{position:absolute;inset:0;background:radial-gradient(circle at 50% 46%,rgba(118,202,239,.26),transparent 50%),linear-gradient(135deg,rgba(89,151,190,.11),transparent 58%)}
 .node__placeholder::before{content:"";position:absolute;inset:19% 22%;border:1px solid rgba(159,223,251,.62);border-radius:50%;transform:rotate(-12deg);box-shadow:0 0 18px rgba(110,205,245,.09)}
 .node__placeholder::after{content:"";position:absolute;left:20%;right:20%;top:50%;height:1px;background:rgba(159,223,251,.55);box-shadow:0 -15px 0 rgba(159,223,251,.17),0 15px 0 rgba(159,223,251,.14)}
@@ -93,6 +96,10 @@ button{font:inherit;color:inherit}
 .detail__scanlines{position:absolute;z-index:3;inset:0;background:repeating-linear-gradient(to bottom,transparent 0 7px,rgba(145,221,255,.045) 8px 9px);pointer-events:none}
 .detail__reticle{position:absolute;inset:3%;border:1px solid rgba(145,221,255,.22);border-radius:50%;pointer-events:none}
 .detail__reticle::before,.detail__reticle::after{content:"";position:absolute;background:rgba(145,221,255,.25)}
+.detail__visual.is-loading img{opacity:.2}
+.detail__visual.is-loading::after{content:"";z-index:4;inset:46% auto auto 50%;width:24px;height:24px;margin:-12px;border:1px solid rgba(170,230,255,.28);border-top-color:rgba(255,255,255,.95);border-radius:50%;animation:atlas-spinner 1s linear infinite;background:none}
+.detail__visual.is-error img{display:none}
+.detail__visual.is-error::after{content:"IMAGE UNAVAILABLE";z-index:4;inset:0;display:grid;place-items:center;color:rgba(183,218,235,.76);font-size:10px;letter-spacing:.2em;background:radial-gradient(ellipse,rgba(78,139,169,.18),transparent 68%)}
 .detail__reticle::before{left:50%;top:-7%;bottom:-7%;width:1px}
 .detail__reticle::after{top:50%;left:-5%;right:-5%;height:1px}
 .detail__info h1{font-size:clamp(20px,3vw,34px);font-weight:300;letter-spacing:.055em;margin:8px 0 14px;line-height:1.15}
@@ -122,6 +129,14 @@ button{font:inherit;color:inherit}
 .atlas-fullscreen__image{display:block;max-width:100%;max-height:calc(100vh - 76px);width:auto;height:auto;object-fit:contain;transform:scale(.94);opacity:0;filter:brightness(.78);transition:transform .78s var(--ease),opacity .58s ease,filter .78s ease}
 .atlas-fullscreen.is-open .atlas-fullscreen__image{transform:scale(1);opacity:1;filter:brightness(1)}
 .atlas-fullscreen.is-closing .atlas-fullscreen__image{transform:scale(.96);opacity:0;filter:brightness(.78)}
+.atlas-image-status{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;color:rgba(214,239,250,.82);font-size:10px;letter-spacing:.2em}
+.atlas-fullscreen.is-loading .atlas-image-status{display:block}
+.atlas-fullscreen.is-loading .atlas-fullscreen__image{opacity:.12}
+.atlas-fullscreen.is-loading::after{content:"";position:absolute;left:50%;top:calc(50% - 28px);width:22px;height:22px;margin-left:-11px;border:1px solid rgba(170,230,255,.3);border-top-color:#fff;border-radius:50%;animation:atlas-spinner 1s linear infinite}
+.atlas-fullscreen.is-error .atlas-image-status{display:block}
+.atlas-fullscreen.is-error .atlas-image-status{font-size:0}
+.atlas-fullscreen.is-error .atlas-image-status::after{content:"IMAGE UNAVAILABLE";font-size:10px}
+@keyframes atlas-spinner{to{transform:rotate(360deg)}}
 .atlas-fullscreen__close{position:absolute;right:18px;top:16px;z-index:2;background:rgba(4,10,15,.86);border-color:rgba(157,225,255,.45)}
 body.atlas-fullscreen-open{overflow:hidden}
 @media (max-width:760px){
