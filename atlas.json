@@ -77,6 +77,30 @@
           "thumb": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-thumb.webp",
           "medium": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-medium.webp",
           "large": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-large.webp"
+        },
+        {
+          "id": "metaverse-2c-violet-alien",
+          "title": "Metaverse 2c violet alien",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/06_metaverse_2c_violet_alien.png",
+          "width": 5760,
+          "height": 3240,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/metaverse-2c-violet-alien-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/metaverse-2c-violet-alien-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/metaverse-2c-violet-alien-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/metaverse-2c-violet-alien-large.webp"
+        },
+        {
+          "id": "planes-of-matter-final",
+          "title": "Planes of matter final",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/07_planes_of_matter_final.png",
+          "width": 5760,
+          "height": 3240,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/planes-of-matter-final-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/planes-of-matter-final-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/planes-of-matter-final-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/planes-of-matter-final-large.webp"
         }
       ]
     },
