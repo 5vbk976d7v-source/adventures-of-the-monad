@@ -17,6 +17,70 @@
       "source": "696938887b3d1621d2af5dff3690873014db9d456fbb97253e8ab2bfc667dcb2",
       "output": "273220647f323a4c06bb87ddbaa90931d1128efd77ffcd25458640eb500c0da1"
     },
+    "cosmology-how-it-all-began/the-cube-micro.webp": {
+      "source": "30de68de5cff42f94583353fb1d4ab277b23420495277df59127c31b642ec004",
+      "output": "b66d90576f89909d03336ea67f41c76593e1132ef4edfcb529bafbfe4125dc14"
+    },
+    "cosmology-how-it-all-began/the-cube-thumb.webp": {
+      "source": "e82f27fd64c1bc5fc2f7962054aad9cfda29e18b31ed7a96a1b0fd8117622618",
+      "output": "1c34df6a6e6b750c8454bc1f1ba781cd64ea3fa5ecbb69ae2d07c96aea353110"
+    },
+    "cosmology-how-it-all-began/the-cube-medium.webp": {
+      "source": "eab1b945e1537d90acfbdd2df51d2d354fc50e517adc27eaa4f0bce402e47b47",
+      "output": "e9ec865b555cf09a4f3719ab85240bd8a2b08394dfab39cc7cdafb2619091c03"
+    },
+    "cosmology-how-it-all-began/the-cube-large.webp": {
+      "source": "e94409efa0765c9db6726f7b8b035bc80ae11a1c4e1a19bad3180edb821e1236",
+      "output": "a9c7bd3c5289c301907eca886b48f52c97b2b91125bbd9a68ae65f4e9a4dc5e2"
+    },
+    "cosmology-how-it-all-began/the-icosahedron-micro.webp": {
+      "source": "4516ca0d12563aedff0449885a4aaa4d71696c5c44bfde7f98e709bf9fdeefd3",
+      "output": "49725650db322de00689b83071d40f6f9fffe003aeecf6ae7a1d7666245d26cf"
+    },
+    "cosmology-how-it-all-began/the-icosahedron-thumb.webp": {
+      "source": "09444c453ff0d4b56c3ce54c10f4d4b07ceeb02a93ba3d30de2ee1891c7cb116",
+      "output": "79da6e215944089ac292a85ddc590382cea781772063ba56f68e6b84dda1c530"
+    },
+    "cosmology-how-it-all-began/the-icosahedron-medium.webp": {
+      "source": "ff5a844e2b780f91984e7611436ea1f1c2151f1b83c1f083c60dd337ba0c6679",
+      "output": "60c6af9bce7be5529c18db77c7501231b04bb54359cc5ef906e507e4704e14a7"
+    },
+    "cosmology-how-it-all-began/the-icosahedron-large.webp": {
+      "source": "293d6cf6f647b46cdf8d94df9955014259bc15750636f4ff28496a8ba554899f",
+      "output": "ce49038752d41b8df6828867cee1137be69d0d4ac6530f7416a27de062d986f7"
+    },
+    "cosmology-how-it-all-began/the-octahedron-micro.webp": {
+      "source": "a23e84fd726d241ed4f3c31e1fb402d13aecb71fbe65c629a0619672ee7d7ca0",
+      "output": "1580020f880ce380688be2c0d55c396dfcc46a6950aba04028b6b8bd9f12eb8c"
+    },
+    "cosmology-how-it-all-began/the-octahedron-thumb.webp": {
+      "source": "dd3756058c575b26a3aea966e56c78a47b784564d52c70e42b2f0687c03cf26d",
+      "output": "d9a3b1bbefc281fd93d388085b40afd0335561ab814746bd8f2312c0ef1efe82"
+    },
+    "cosmology-how-it-all-began/the-octahedron-medium.webp": {
+      "source": "efacbcb6f97e0d94c3841a8b65063a901784066b7946a86ed89283de7dbd2541",
+      "output": "59a07621862a2a95334e4a64f94f72068973719ae2d2f46408ccbea5f85de8e3"
+    },
+    "cosmology-how-it-all-began/the-octahedron-large.webp": {
+      "source": "bdd28059bc0b6f8e91559891e31b48e80822344e39b70cf40a3f1466afb747f4",
+      "output": "86fb8a25d84233b5a8d186eabdd2317185ff84e8d034f43fe79b8aa8e02f7e98"
+    },
+    "cosmology-how-it-all-began/the-tetrahedron-micro.webp": {
+      "source": "cbbb60cdb47e53aa5ca15c0d0507d4e1f3bb50e92d8f9bc04a755f5ae15d7903",
+      "output": "d9cfbfb0e7dd9f54fd469b11848bbae9f5d0c27fb7e219d2b1d251651cead8b7"
+    },
+    "cosmology-how-it-all-began/the-tetrahedron-thumb.webp": {
+      "source": "446c14d914fa69d42f724bbe65e338e96dfa3c3779507a5e7d9f8d5cf7e2e4ca",
+      "output": "02a8e29ec6da83e09870c87a0ab75eabc80c97763fe60c7920c4f0d7c1a766c9"
+    },
+    "cosmology-how-it-all-began/the-tetrahedron-medium.webp": {
+      "source": "ce7c6d5055ecc85e03d417514f1a1077f848d14aca93463b1d8faf6883a46286",
+      "output": "d9fe5ff249f6006f9a4a7f92cfb70a3eee87beb27091e6a50436dcd0052ebe6a"
+    },
+    "cosmology-how-it-all-began/the-tetrahedron-large.webp": {
+      "source": "8b4048ee32063d28cb0b13113721925f0f314c87c846814402db7e3170523882",
+      "output": "b066c0a859c17d61685b4bc7ea0da80c3e7fef5709f15ab09831b5d8e7fd38b8"
+    },
     "the-monad-how-it-functions/the-monad-the-soul-and-its-personalities-micro.webp": {
       "source": "ec1e0cbec0cd992b7e3af1e38146b8d8a2a2a7a6eb3a7d79dc2275f2a8578a92",
       "output": "77e884464612e62ca090daf91c3acdfd034e6fe7357079d908988464781f80dd"

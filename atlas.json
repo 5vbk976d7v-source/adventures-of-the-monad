@@ -29,6 +29,54 @@
           "thumb": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-thumb.webp",
           "medium": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-medium.webp",
           "large": "assets/diagrams/cosmology-how-it-all-began/metaverse-antverse-and-universes-large.webp"
+        },
+        {
+          "id": "the-cube",
+          "title": "The Cube",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/02_The%20Cube.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/the-cube-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/the-cube-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/the-cube-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/the-cube-large.webp"
+        },
+        {
+          "id": "the-icosahedron",
+          "title": "The Icosahedron",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/03_The%20Icosahedron.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/the-icosahedron-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/the-icosahedron-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/the-icosahedron-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/the-icosahedron-large.webp"
+        },
+        {
+          "id": "the-octahedron",
+          "title": "The Octahedron",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/04_The%20Octahedron.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/the-octahedron-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/the-octahedron-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/the-octahedron-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/the-octahedron-large.webp"
+        },
+        {
+          "id": "the-tetrahedron",
+          "title": "The Tetrahedron",
+          "caption": "",
+          "original": "diagrams/01_cosmology-how-it-all-began/05_The%20Tetrahedron.png",
+          "width": 3840,
+          "height": 2161,
+          "micro": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-micro.webp",
+          "thumb": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-thumb.webp",
+          "medium": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-medium.webp",
+          "large": "assets/diagrams/cosmology-how-it-all-began/the-tetrahedron-large.webp"
         }
       ]
     },

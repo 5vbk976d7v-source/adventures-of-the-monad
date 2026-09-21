@@ -10,6 +10,30 @@
       "title": "Metaverse, Antverse and Universes",
       "file": "01_metaverse-antverse-and-universes.png",
       "caption": ""
+    },
+    {
+      "id": "the-cube",
+      "title": "The Cube",
+      "file": "02_The Cube.png",
+      "caption": ""
+    },
+    {
+      "id": "the-icosahedron",
+      "title": "The Icosahedron",
+      "file": "03_The Icosahedron.png",
+      "caption": ""
+    },
+    {
+      "id": "the-octahedron",
+      "title": "The Octahedron",
+      "file": "04_The Octahedron.png",
+      "caption": ""
+    },
+    {
+      "id": "the-tetrahedron",
+      "title": "The Tetrahedron",
+      "file": "05_The Tetrahedron.png",
+      "caption": ""
     }
   ]
 }
