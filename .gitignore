@@ -4,6 +4,3 @@ node_modules/
 _site/
 .firecrawl/
 /.worktrees/
-/backups/*
-/diagrams-copy
-diagrams-old-assets

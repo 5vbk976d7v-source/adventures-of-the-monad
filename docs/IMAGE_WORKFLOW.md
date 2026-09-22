@@ -1,62 +1,17 @@
 # Diagram images
 
-## Where content lives
+## Add, replace, or remove diagrams
 
-Each directory under `diagrams/` is a category. A category may contain source
-images and a `folder.json`. Existing metadata preserves category and diagram
-IDs, titles, captions, category order and preferred cover. Keep it with the
-originals when uploading the library to Hostinger.
+Use Hostinger File Manager in `public_html/atlas-media/diagrams/`. Each immediate subfolder is a category. Upload supported PNG, JPEG, or WebP originals into the category folder; descriptive filenames are recommended. Numeric filename prefixes such as `08_` set display order. Do not upload generated WebP derivatives: `image.php` creates and caches them on demand.
 
-The migration copy on `main` remains intact until the Hostinger upload has been
-verified. After cutover, ordinary image maintenance happens in Hostinger File
-Manager; it does not require Git, WordPress editing or individual URL entry.
+The scanner discovers added and removed images automatically. You do not need to edit `folder.json` for an ordinary upload. Existing metadata remains useful for category titles/order/covers and authored diagram titles/captions. New images without metadata use a title derived from the filename.
 
-## Add, replace or delete an image after cutover
+The catalog refreshes after its configured cache period (currently 60 seconds). A configured cover is used while it exists; otherwise the service chooses a `00_`/`00-` image, then the first available diagram. Replacing an image at the same path keeps its identity and refreshes its versioned URLs. Renaming it creates a new identity.
 
-1. Open the appropriate folder under `public_html/atlas-media/diagrams/`.
-2. Bulk-upload, replace or delete image files (`png`, `jpg`, `jpeg`, `webp`).
-3. Use a numeric prefix such as `08_` when you want to set its order. Keep
-   filenames descriptive; no prefix is required.
-4. Reload the Atlas after the catalog cache (initially 60 seconds) expires.
+## Preserve metadata and service state
 
-The PHP scanner discovers files directly, so ordinary uploads do not need
-changes to `folder.json`. The generated catalog JSON is an API response cached
-on Hostinger; it is not a file that you edit. Existing `folder.json` entries
-continue to define editorial titles and order for listed files. New files are
-appended in natural filename order and receive permanent IDs in the private
-Hostinger ID registry. Deleted files disappear from the catalog while their ID
-mapping remains available for restoration.
+Keep each category's `folder.json` with its originals. It may include category `id`, `title`, `order`, `cover`, `description`, and an `images` array with image `id`, `file`, `title`, and `caption` fields. The private Hostinger `state/ids.json` preserves IDs assigned to discovered files. Back up both metadata and the ID registry with the original images. Never delete or overwrite the `state/` directory during a code update.
 
-Cover selection uses the configured cover if it still exists, then `00-cover.*`,
-then the first available diagram. Empty categories are omitted. Replacing a file
-at the same path preserves its identity and refreshes its image URL/cache key.
-Renaming a file creates a new identity unless the registry is deliberately
-migrated.
+## Local preview
 
-## Local development
-
-Run `npm start` and open the local URL. The Node server scans the repository's
-`diagrams/` directory at `/catalog.json` and serves local originals at their
-normal file paths. It reads the same optional metadata and discovery rules as
-the PHP service, but does not generate WebP derivatives or modify
-`folder.json`. Add/delete local source files and reload to rescan.
-
-The UI build is independent of the images. `npm test` and `npm run build` do not
-contact Hostinger, process images or include `diagrams/`, `assets/diagrams/` or
-the legacy `atlas.json` in `_site/`.
-
-## Service and testing
-
-On the `media` branch, `catalog.php` returns category data and `image.php`
-returns originals or on-demand WebP derivatives (320, 640, 960 or 1600 pixels
-on the long edge). The first request for a preset generates a cached derivative;
-later requests return that cached file. Detail and fullscreen use the unchanged
-original. The service uses source-versioned URLs, locks, atomic writes, pixel
-limits and path validation.
-
-Before cutover, test CORS from production and testing Pages origins; compare
-category and image counts, titles, order, covers and IDs; and test new uploads,
-replacements, deletion, fallback covers, a first derivative, a cached derivative
-and a missing image. Keep a backup of originals, `folder.json` files and
-`state/ids.json`. The Hostinger install steps and verification checklist are in
-[DEPLOYMENT.md](DEPLOYMENT.md).
+The main branch retains a local copy under `diagrams/` for development. `npm start` scans it at `/catalog.json`; reload after changing files. The GitHub Pages build excludes this copy.
