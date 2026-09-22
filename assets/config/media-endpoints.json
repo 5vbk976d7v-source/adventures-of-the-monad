@@ -1,0 +1,5 @@
+{
+  "production": "https://adventuresofthemonad.com/atlas-media/catalog.php",
+  "testing": "https://adventuresofthemonad.com/atlas-media/catalog.php",
+  "development": "catalog.json"
+}

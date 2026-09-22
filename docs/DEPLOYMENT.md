@@ -1,8 +1,17 @@
-# Consciousness Atlas — Static deployment
+# Deployment
 
-The atlas runs on GitHub Pages without a backend. Node.js 22+ and Sharp are needed only before publication. The browser reads `atlas.json` and prebuilt image assets.
+The application and image service deploy independently:
 
-## Local preview
+- `main` builds the small static UI artifact for GitHub Pages.
+- `media` contains the PHP catalog and image service for
+  `https://adventuresofthemonad.com/atlas-media/`.
+
+The Pages artifact does not include originals, generated derivatives, PHP,
+metadata files, or the local ID registry. WordPress is not modified.
+
+## Local UI development
+
+Requirements: Node.js 22+.
 
 ```bash
 npm ci
@@ -11,30 +20,57 @@ npm run build
 npm start
 ```
 
-Open `http://127.0.0.1:8080`. The server serves `_site/`, the same directory uploaded to Pages. Rebuild after changing application files, source images or metadata. `npm run build:atlas` regenerates only the catalog and image derivatives; `npm run build` also assembles the published site. To test a repository prefix, start with `BASE_PATH=/aom-atlas npm start` and open `/aom-atlas/`.
+Open `http://127.0.0.1:8080/`. The Node server dynamically scans the repository's
+`diagrams/` folders at `/catalog.json` and serves the local original images. This
+is the PHP catalog equivalent for development; it does not resize images. It
+uses the same catalog fields, folder metadata, ordering, cover fallback and
+automatic discovery rules as the Hostinger service. Restarting is not needed
+after adding an image; reload the Atlas to rescan. To test a GitHub project path,
+set `BASE_PATH=/aom-atlas` and open `http://127.0.0.1:8080/aom-atlas/`.
 
-## GitHub Pages setup
+For an end-to-end local test of the Hostinger URL contract, open
+`http://127.0.0.1:8080/?media=simulator` (or append that query to the project
+path). Node then exposes `/atlas-media/catalog.php` and `/atlas-media/image.php`
+and the app uses those endpoints instead of `/catalog.json` and direct image
+files. The simulator checks supported presets, safe paths, missing/changed
+images, and catalog discovery. It serves the original bytes for every preset,
+so use Hostinger or PHP with GD WebP to verify derivative generation and its
+performance.
 
-1. In the repository's **Settings → Pages**, choose **GitHub Actions** as the build/deployment source.
-2. Review `.github/workflows/pages.yml`. It publishes on pushes to `main`, or a manual dispatch on `main`. For another publishing branch, change the trigger and deployment condition together.
-3. Ensure the `github-pages` environment permits that branch; keep any desired reviewer protection. Allow the build job's `contents: write` permission and bot pushes under branch rules. If direct pushes are prohibited, use a separately configured generated-content PR or authorized GitHub App workflow.
-4. Merge the reviewed changes. The workflow installs lockfile dependencies, tests, synchronizes images/metadata, builds `_site/`, commits/pushes generated changes to main in `5vbk976d7v-source/adventures-of-the-monad` and temporarily in `jder7/aom-atlas` for QA, uploads that artifact and deploys it. It stages only `diagrams/`, `assets/diagrams/` and `atlas.json`. No-change builds create no commit. Bot pushes do not retrigger this workflow; deployment continues in the same run. The testing repository `jder7/aom-atlas` commits generated changes for QA by default; set its `commitGenerated` entry to `false` in `.github/atlas-build.json` to disable commits afterward through an ordinary source change; inspect its Action log or run summary captured before committing for the list of new, modified or deleted source/metadata/catalog/asset files.
-5. Open the URL reported by the deployment job. Check a category, title search, detail link, fullscreen and representative images.
+`npm run build` only assembles UI files under `_site/`; it does not scan images,
+generate derivatives or require access to Hostinger. It deliberately excludes
+`diagrams/`, `assets/diagrams/` and the old root `atlas.json` even while those
+legacy assets remain in the main branch during migration.
 
-Repository settings must be applied by an administrator; adding workflow files alone does not enable Pages. This follows GitHub's [custom Pages workflow guidance](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+## GitHub Pages
 
-## Paths and permanent links
+The `.github/workflows/pages.yml` workflow runs tests, builds `_site/` and
+publishes it on pushes to `main`. It only needs read access to the repository;
+it does not write generated files or commit bot changes. The repository owner
+must have configured GitHub Pages to use GitHub Actions and permitted the
+`github-pages` deployment environment.
 
-The same output supports `https://owner.github.io/repository/` and a custom domain root. Asset paths are relative; no hard-coded repository name or rewrite rule is required. A detail URL uses the current page path and `?diagram=<category-id>/<diagram-id>`; query strings require no SPA routing fallback.
+The catalog endpoint mapping is in
+`assets/config/media-endpoints.json`. Production and testing currently point to
+the agreed Hostinger domain; local development uses Node's `/catalog.json`.
+If a temporary test service is used before cutover, change only the `testing`
+URL and restore it after QA. The service must allow CORS from
+`https://atlas.adventuresofthemonad.com` and the testing Pages origin
+`https://jder7.github.io`.
 
-IDs are permanent identifiers. Changing them breaks shared links. Titles, filenames and display order may change without changing IDs.
+## Hostinger media service
 
-## Publication boundary
+The `media` branch is trimmed to the Hostinger runtime files only: root
+`.htaccess`, `catalog.php`, `image.php`, `media-config.php`,
+`lib/AtlasMedia.php`, and `diagrams/.htaccess`. Upload these to
+`public_html/atlas-media/`, then bulk-upload the cleaned category folders into
+its `diagrams/` directory. Keep category `folder.json` files and the service's
+`state/ids.json` with the originals. Do not overwrite or clear data/state when
+updating code. Verify PHP 8.1+, GD WebP, writable state storage, catalog CORS and
+image responses in a temporary location before the app switches to it.
 
-Only `_site/` is published: the browser entrypoint, assets, catalog and referenced originals. Never upload the repository root, which contains documentation, metadata, tooling and historical backups.
-
-PR checks use a read-only token and cannot deploy or push. The main build job has `contents: write`; only the deployment job has `pages: write` and `id-token: write`. The built-in token suffices for same-repository pushes where branch rules permit them. No processing server is needed.
-
-Publishing runs share a repository-local concurrency group and check out latest main. If another writer advances main while processing, the normal push fails and prevents stale publication; rerun the workflow. Separate repositories do not share this lock. For a shared source repository, centralize processing there and let other repositories consume committed assets. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for permissions, alternatives and concurrent builds.
-
-The old backend/specification is retained in `backups/pre-github-pages-2026-09-20.tar.gz`, excluded from publication. The active project has no PHP or Apache configuration. For content changes, follow [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md).
+After the real catalog and image endpoints are tested, the Pages UI can switch
+to the Hostinger source without rebuilding or committing any images. Preserve a
+backup of originals, metadata and ID registry. The user removes `diagrams/`
+from `main` only after verifying the Hostinger migration; no history rewrite is
+part of this deployment.

@@ -1,4 +1,4 @@
-name: Publish atlas
+name: Publish Atlas UI
 
 on:
   push:
@@ -16,56 +16,18 @@ jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v5
         with:
           ref: main
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Read versioned commit settings
-        id: commit-settings
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, appendFileSync } from 'node:fs';
-          const config = JSON.parse(readFileSync('.github/atlas-build.json', 'utf8'));
-          const settings = config.commitGenerated;
-          if (!settings || typeof settings !== 'object' || Array.isArray(settings) ||
-              Object.values(settings).some(value => typeof value !== 'boolean')) {
-            throw new Error('commitGenerated must map repository names to booleans');
-          }
-          const enabled = Object.hasOwn(settings, process.env.GITHUB_REPOSITORY) &&
-            settings[process.env.GITHUB_REPOSITORY] === true;
-          appendFileSync(process.env.GITHUB_OUTPUT, `enabled=${enabled}\n`);
-          console.log(`Generated-content commits: ${enabled ? 'enabled' : 'disabled'}`);
-          NODE
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - name: Verify publish consistency
-        run: node scripts/verify-publish.mjs
-      - name: List generated changes in the test repository
-        if: github.repository == 'jder7/aom-atlas'
-        run: |
-          printf '### Generated content changes\n\nNew, modified or deleted files (an empty list means no changes).\n\n```text\n' >> "$GITHUB_STEP_SUMMARY"
-          git status --short --untracked-files=all -- diagrams/ assets/diagrams/ atlas.json | tee -a "$GITHUB_STEP_SUMMARY"
-          printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
-      - name: Commit processed diagrams and catalog
-        # After QA disable the testing entry in .github/atlas-build.json.
-        if: steps.commit-settings.outputs.enabled == 'true'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- diagrams/ assets/diagrams/ atlas.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: synchronize diagram metadata and assets"
-            git push origin HEAD:main
-          fi
-        # A concurrent main update rejects this push; never force-push or publish
-        # that stale artifact. Rerun against the latest main if necessary.
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

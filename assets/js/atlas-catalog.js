@@ -6,13 +6,44 @@ export function diagramTitle(item, index = 0) {
   return safeText(item?.title, `Diagram ${String(index + 1).padStart(2, '0')}`);
 }
 
-// The same prebuilt catalog is served locally and on GitHub Pages.
+export function catalogEndpoint(config, location = window.location) {
+  const url = new URL(location.href);
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (isLocal && url.searchParams.get('media') === 'php') {
+    return 'http://127.0.0.1:7071/catalog.php';
+  }
+  if (isLocal && url.searchParams.get('media') === 'simulator') {
+    return new URL('atlas-media/catalog.php', location.href).href;
+  }
+  const host = location.hostname.toLowerCase();
+  const key = host === 'localhost' || host === '127.0.0.1' ? 'development'
+    : host === 'jder7.github.io' ? 'testing' : 'production';
+  const endpoint = config?.[key];
+  if (typeof endpoint !== 'string' || !endpoint.trim()) throw new Error(`Atlas ${key} catalog endpoint is not configured`);
+  return new URL(endpoint, location.href).href;
+}
+
+async function fetchJson(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    if (!response.ok) throw new Error(`Atlas request: ${response.status}`);
+    return await response.json();
+  } finally { clearTimeout(timeout); }
+}
+
 export async function loadCatalog(emptyEl) {
-  const res = await fetch('atlas.json', { cache: 'no-cache', credentials: 'same-origin' });
-  if (!res.ok) throw new Error(`Atlas catalog: ${res.status}`);
-  const catalog = await res.json();
-  if (!catalog || !Array.isArray(catalog.collections)
-      || catalog.collections.some(category => !category.id || !Array.isArray(category.images))) {
+  const config = await fetchJson(new URL('assets/config/media-endpoints.json', document.baseURI), { cache: 'no-cache' });
+  const endpoint = catalogEndpoint(config);
+  const local = new URL(endpoint).origin === window.location.origin;
+  const catalog = await fetchJson(endpoint, { cache: 'no-cache', credentials: local ? 'same-origin' : 'omit' });
+  const validImage = image => image && typeof image.id === 'string'
+    && ['original', 'micro', 'thumb', 'medium', 'large'].every(key => typeof image[key] === 'string' && image[key]);
+  if (!catalog || catalog.version !== 1 || !Array.isArray(catalog.collections)
+      || catalog.collections.some(category => !category || typeof category.id !== 'string'
+        || typeof category.title !== 'string' || !validImage(category.cover)
+        || !Array.isArray(category.images) || category.images.some(image => !validImage(image)))) {
     throw new Error('Invalid Atlas catalog');
   }
   emptyEl.hidden = true;

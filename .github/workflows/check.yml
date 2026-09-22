@@ -1,7 +1,8 @@
-name: Validate atlas
+name: Validate Atlas UI
 
 on:
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -9,6 +10,7 @@ permissions:
 
 jobs:
   validate:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

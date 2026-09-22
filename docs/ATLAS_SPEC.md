@@ -1,6 +1,6 @@
 # Consciousness Atlas — Product & Interaction Specification
 
-Version: 0.4 — static publishing
+Version: 0.5 — external media delivery
 
 Status: active implementation
 
@@ -16,30 +16,27 @@ The project must not use Japanese decorative characters or unrelated sci-fi insc
 
 ## 2. Deployment architecture
 
-The browser loads static HTML, CSS, JavaScript, artwork and `atlas.json`. No request computes an image or lists a directory. GitHub Pages project paths and custom-domain roots are both supported through relative asset URLs.
+The UI is a static GitHub Pages site. It loads its catalog from a read-only PHP endpoint hosted separately at `https://adventuresofthemonad.com/atlas-media/catalog.php`; image variants are returned by the companion `image.php` endpoint. The service scans uploaded files and generates derivatives on first request. WordPress is neither modified nor required.
 
 ```text
-diagrams/<category>/     original images and folder.json source metadata
-scripts/                 validation and offline image/catalog build
-assets/                  browser code and holographic artwork
-_site/                   generated deployment artifact
-  index.html
-  atlas.json
-  assets/
-  diagrams/
+main branch              UI, artwork and public endpoint configuration
+media branch             PHP catalog/image service and deployment guide
+Hostinger atlas-media/   diagrams, private ID/catalog state and WebP cache
+diagrams/<category>/     retained migration source on main until cutover
+_site/                   small UI-only GitHub Pages artifact
 ```
 
-Node.js and Sharp are build tools only. The published site has no server runtime, database, PHP, Apache configuration or WordPress dependency. The local static server serves the same generated artifact used in production. Only `_site/` is uploaded; source documentation, backup archives and tooling are excluded.
+The Pages artifact contains no source diagrams or generated image derivatives. Node.js is used for the UI build and a local development server; the Node server dynamically scans local `diagrams/` to provide the PHP service's catalog equivalent and serves originals without resizing. Production uses the PHP service. Only `_site/` is published to Pages.
 
 The pre-pivot specification and backend are preserved in `backups/pre-github-pages-2026-09-20.tar.gz`.
 
 ## 3. Content model
 
-`docs/Knowledge Atlas Folder Structure.pages` supplies the category taxonomy. Source category directories live under `diagrams/`; category metadata and explicitly listed diagrams live in each `folder.json`. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for the authoring schema and agent workflow.
+`docs/Knowledge Atlas Folder Structure.pages` supplies the category taxonomy. During migration source folders remain under `diagrams/`; after cutover Hostinger is the live image source. Existing `folder.json` files preserve titles, captions, IDs, order and cover choices. They do not need to list every uploaded file. See [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for the upload workflow.
 
-Each category and diagram has a stable ID. Titles, order and filenames can change without changing the ID. Permanent links use these IDs, never an array position. The build discovers unlisted originals and appends metadata entries with filename-derived IDs/titles and blank captions. Unnumbered files get the next prefix above the category maximum (`01_`, `02_`, …, `100_`). Existing IDs, numbers, authored metadata and array order remain unchanged; gaps are allowed. Covers are selected explicitly in metadata and must reference a real local source image. A separate cover is not automatically added as a diagram.
+Each category and diagram has a stable ID. Titles, order and filenames can change without changing an existing ID. Permanent links use IDs, never array positions. The scanner discovers new files and stores their assigned IDs in a private registry. Existing listed image order remains first; new files follow in natural filename order. Numeric prefixes affect order but are optional and do not define IDs. A missing preferred cover falls back to `00-cover.*`, then the first available image.
 
-The generated `atlas.json` is the browser's sole catalog. It contains the complete ordered category/diagram list and relative URLs for original, micro, thumb, medium and large assets. Regenerate it from source metadata rather than editing generated JSON. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
+The browser consumes a version 1 catalog with ordered categories and `original`, `micro`, `thumb`, `medium` and `large` URLs. Production URLs are absolute HTTPS links to `image.php`; local Node-development URLs point to local originals for every size. The production catalog is cached briefly and generated from current folder contents; it is not hand-edited. The number of categories is data-driven; the six-at-a-time depth model also supports final groups smaller than six.
 
 ## 4. Main atlas composition
 
@@ -188,7 +185,7 @@ The HUD also provides a title search across all catalogued diagrams. Matching ti
 
 Original diagrams may be PNG/WebP/JPEG files around 2–4 MB. Originals are retained as masters but are not used for ordinary production atlas nodes.
 
-Each source image receives WebP derivatives during the offline build, before publication:
+Production derivatives are generated lazily by Hostinger on first request and cached:
 
 | derivative | max dimension | purpose | target scale |
 |---|---:|---|---|
@@ -200,13 +197,13 @@ Each source image receives WebP derivatives during the offline build, before pub
 
 The JavaScript swaps image resolution according to the current displayed node size. Future/hidden nodes do not load image data until they approach visibility.
 
-## 12. Offline derivative generation
+## 12. On-demand image delivery
 
-`npm run build` synchronizes/validates source metadata and images, generates the four fixed WebP sizes with Sharp and assembles `_site/`, including originals for fullscreen. Resizing preserves image proportions and does not enlarge small sources. `atlas.json`, generated WebP assets and `assets/diagrams/manifest.json` are committed to the repository. Source/settings/output fingerprints allow reuse of unchanged derivatives and regenerate missing, corrupt or stale assets. The manifest is not published. Requests never mutate the site.
+`image.php` generates only the requested fixed preset (320/640/960/1600 px), preserves aspect ratio/orientation and never enlarges small sources. It caches WebP derivatives under a source-versioned key, serializes concurrent generation and writes atomically. Originals remain unchanged for detail/fullscreen. The browser chooses the URL for the rendered node size and does not load future/invisible node images unnecessarily.
 
 ## 13. Catalog and local preview
 
-`assets/js/atlas-catalog.js` fetches relative `atlas.json`. Missing or invalid catalog data must be visible as an error; no demo catalog should conceal a publishing failure.
+`assets/js/atlas-catalog.js` reads the endpoint map in `assets/config/media-endpoints.json` and validates the returned catalog. Local preview uses `/catalog.json` from the Node scanner; testing and production use the configured Hostinger URL. Missing or invalid catalog data must be visible as an error.
 
 ```bash
 npm ci
@@ -215,17 +212,17 @@ npm start
 # http://127.0.0.1:8080
 ```
 
-After changing originals or metadata, rebuild before previewing. Source content and generated URLs must work under a repository path as well as at the domain root.
+After changing local originals or metadata, reload preview to rescan. Local and hosted image URLs must work under a repository path as well as at the domain root.
 
 ## 14. Validation and publishing
 
-- Parse source metadata as JSON, never executable code.
-- Accept supported local image formats only; reject unsafe paths, symlinks, duplicate IDs and missing image references.
+- Parse category metadata as JSON, never executable code.
+- Accept supported local image formats only; reject unsafe paths and symlinks.
 - Limit decoded source dimensions and use only the fixed derivative presets.
 - Include only public site assets in the deployment artifact.
 - Pull requests run validation/build with a read-only repository token; they cannot deploy.
 - Main-branch publishing uses the GitHub Pages artifact/deployment actions. Only the deployment job receives Pages/OIDC write permissions.
-- The main build job receives contents-write permission to commit processed originals, metadata, catalog and derivatives before deployment in the source repository `5vbk976d7v-source/adventures-of-the-monad` and temporarily in `jder7/aom-atlas` during QA. The testing mirror lists changes before committing. Versioned `.github/atlas-build.json` enables commits per repository; both entries are currently true. Set the testing entry to false after QA; independent bot commits may require reconciliation between remotes. PR builds never push. Repository-local concurrency serializes publishing; a rejected normal push stops deployment and requires a fresh run.
+- GitHub Actions builds and deploys only the static UI. It has no permission to write generated image or catalog content.
 - Never run pull-request code using privileged `pull_request_target` workflows.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for repository setup and [IMAGE_WORKFLOW.md](IMAGE_WORKFLOW.md) for content changes.
@@ -251,4 +248,4 @@ Connections are redrawn against stored node geometry and distinct head anchor po
 
 The app retains continuous semantic depth, asymmetric oval chambers, supplied holographic artwork and head transitions, distinct connection anchors, pointer/touch controls, title autocomplete, permanent detail links, fullscreen inspection and the two graded depth meters.
 
-Publishing now builds static assets and `atlas.json` ahead of time for GitHub Pages. The old dynamic backend and sample taxonomy are retired; the Pages document defines the replacement source categories.
+The UI build now produces a small Pages artifact and fetches the live catalog and images from the separate Hostinger service. Local Node development dynamically scans retained repository diagrams so behavior can be checked before Hostinger cutover.

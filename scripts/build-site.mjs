@@ -1,7 +1,6 @@
 import { cp, mkdir, readdir, readFile, writeFile, rm, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildAtlas } from './build-atlas.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const PUBLIC_ASSET = /\.(css|js|json|png|jpe?g|webp|svg|woff2?|ico)$/i;
@@ -18,26 +17,15 @@ async function copyAssets(source, destination) {
 }
 
 export async function buildSite(root = ROOT) {
-  const catalog = await buildAtlas(root);
   const destination = path.join(root, '_site');
   await rm(destination, { recursive: true, force: true });
   await mkdir(destination);
-  for (const file of ['index.html', 'atlas.json']) await cp(path.join(root, file), path.join(destination, file));
-  // Only app assets and catalog-referenced diagrams are published.
-  for (const directory of ['css', 'js', 'artwork']) {
+  await cp(path.join(root, 'index.html'), path.join(destination, 'index.html'));
+  await cp(path.join(root, 'favicon.ico'), path.join(destination, 'favicon.ico'));
+  for (const directory of ['css', 'js', 'artwork', 'config']) {
     await copyAssets(path.join(root, 'assets', directory), path.join(destination, 'assets', directory));
   }
-  const urls = new Set();
-  for (const category of catalog.collections) for (const image of [category.cover, ...category.images]) {
-    for (const key of ['original', 'micro', 'thumb', 'medium', 'large']) urls.add(image[key]);
-  }
-  for (const url of urls) {
-    const relative = url.split('/').map(decodeURIComponent).join(path.sep);
-    await mkdir(path.dirname(path.join(destination, relative)), { recursive: true });
-    await cp(path.join(root, relative), path.join(destination, relative));
-  }
   await writeFile(path.join(destination, '.nojekyll'), '');
-  // A custom domain is opt-in, never inferred from local preview URLs.
   try {
     const domain = (await readFile(path.join(root, 'CNAME'), 'utf8')).trim();
     if (!/^[a-z0-9.-]+$/i.test(domain)) throw new Error('Invalid CNAME');
