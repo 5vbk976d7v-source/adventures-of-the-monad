@@ -37,6 +37,54 @@ images, and catalog discovery. It serves the original bytes for every preset,
 so use Hostinger or PHP with GD WebP to verify derivative generation and its
 performance.
 
+### Split-port test with the actual PHP service
+
+This runs the UI and media service independently, as they are deployed. Use
+two terminals from the repository checkout:
+
+1. Build and start the UI from the repository root:
+
+   ```sh
+   npm run build
+   PORT=7070 npm start
+   ```
+
+2. Create `.worktrees/media/media-config.local.php` with local URLs, source
+   directory, writable state and the UI origin in CORS:
+
+   ```php
+   <?php
+   return [
+       'public_base_url' => 'http://127.0.0.1:7071',
+       'diagram_dir' => __DIR__ . '/diagrams',
+       'state_dir' => '/tmp/atlas-media-local-state',
+       'allowed_origins' => ['http://127.0.0.1:7070'],
+       'catalog_ttl' => 1,
+   ];
+   ```
+
+   Start PHP from the media worktree:
+
+   ```sh
+   cd .worktrees/media
+   php -S 127.0.0.1:7071 -t .
+   ```
+
+3. Open `http://127.0.0.1:7070/?media=php`. The UI requests
+   `http://127.0.0.1:7071/catalog.php`; returned image URLs also point to port
+   7071. Confirm the browser console has no CORS errors and open a diagram to
+exercise the original and WebP preset endpoints.
+
+To test the local UI against the deployed production media service instead,
+open `http://127.0.0.1:7070/?media=production`. The production media service
+must allow `http://127.0.0.1:7070` in its CORS origin list.
+
+The PHP service scans the folder configured by `diagram_dir`; it must contain
+category folders with valid image files. Keep `media-config.local.php` local and
+remove it and `/tmp/atlas-media-local-state` when finished. This mode requires
+PHP GD with WebP support. Use `127.0.0.1` consistently so the CORS origin
+matches; `localhost` is a different origin.
+
 `npm run build` only assembles UI files under `_site/`; it does not scan images,
 generate derivatives or require access to Hostinger. It deliberately excludes
 `diagrams/`, `assets/diagrams/` and the old root `atlas.json` even while those

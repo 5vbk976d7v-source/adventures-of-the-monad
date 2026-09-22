@@ -31,6 +31,10 @@ on port 7071, then open `http://127.0.0.1:7070/?media=php`. This mode fetches
 the catalog and images from the separate PHP server and requires its CORS allow
 list to include `http://127.0.0.1:7070`.
 
+To use the deployed production media service from the local UI, open
+`http://127.0.0.1:7070/?media=production`. The media server must allow that UI
+origin in its CORS list.
+
 ## Image storage and delivery
 
 Category originals and `folder.json` metadata remain in `diagrams/` on `main`

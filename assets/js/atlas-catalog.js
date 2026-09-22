@@ -9,6 +9,11 @@ export function diagramTitle(item, index = 0) {
 export function catalogEndpoint(config, location = window.location) {
   const url = new URL(location.href);
   const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (isLocal && url.searchParams.get('media') === 'production') {
+    const endpoint = config?.production;
+    if (typeof endpoint !== 'string' || !endpoint.trim()) throw new Error('Atlas production catalog endpoint is not configured');
+    return new URL(endpoint, location.href).href;
+  }
   if (isLocal && url.searchParams.get('media') === 'php') {
     return 'http://127.0.0.1:7071/catalog.php';
   }
