@@ -1,5 +1,0 @@
-.DS_Store
-execution/
-node_modules/
-_site/
-# assets/diagrams/ and atlas.json are generated but versioned.

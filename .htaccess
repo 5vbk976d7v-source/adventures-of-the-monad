@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^state(?:/|$) - [F,L]
+
+<FilesMatch "^(?:folder\.json|media-config(?:\.local)?\.php)$">
+  Require all denied
+</FilesMatch>
