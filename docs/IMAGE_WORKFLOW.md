@@ -6,6 +6,8 @@ Use Hostinger File Manager in `public_html/atlas-media/diagrams/`. Each immediat
 
 The scanner discovers added and removed images automatically. You do not need to edit `folder.json` for an ordinary upload. Existing metadata remains useful for category titles/order/covers and authored diagram titles/captions. New images without metadata use a title derived from the filename.
 
+To write the current file list back into every category's `folder.json`, use the separate maintenance page at `https://adventuresofthemonad.com/atlas-media/sync-folder-json.php`. It does not run during normal catalog requests. Set a long random `sync_token` in Hostinger-only `media-config.local.php`, open the page, and submit the token. The sync preserves existing entries and category settings, removes entries for missing files, appends new files, and clears the catalog cache. Keep the token out of URLs and Git.
+
 The catalog refreshes after its configured cache period (currently 60 seconds). A configured cover is used while it exists; otherwise the service chooses a `00_`/`00-` image, then the first available diagram. Replacing an image at the same path keeps its identity and refreshes its versioned URLs. Renaming it creates a new identity.
 
 ## Preserve metadata and service state

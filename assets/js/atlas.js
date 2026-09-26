@@ -163,9 +163,11 @@ import { loadSizedImage } from './atlas-images.js';
       try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
       field.remove();
     }
-    const label = detailCopyLinkBtn.textContent;
-    detailCopyLinkBtn.textContent = copied ? 'LINK COPIED' : 'COPY FAILED';
-    window.setTimeout(() => { detailCopyLinkBtn.textContent = label; }, 1800);
+    const label = detailCopyLinkBtn.querySelector('.button__label');
+    const originalLabel = label?.textContent || detailCopyLinkBtn.textContent;
+    if (label) label.textContent = copied ? 'LINK COPIED' : 'COPY FAILED';
+    else detailCopyLinkBtn.textContent = copied ? 'LINK COPIED' : 'COPY FAILED';
+    window.setTimeout(() => { if (label) label.textContent = originalLabel; else detailCopyLinkBtn.textContent = originalLabel; }, 1800);
   }
 
   function openDiagramFromLink() {
@@ -499,6 +501,22 @@ import { loadSizedImage } from './atlas-images.js';
     meters.forEach(meter => {
       meter.style.setProperty('--meter-progress', `${progress}%`);
       meter.style.setProperty('--meter-handle', `${handle}%`);
+      if (meter.dataset.levels !== String(max)) {
+        meter.dataset.levels = String(max);
+        meter.querySelectorAll('.atlas__meter-tick').forEach(tick => tick.remove());
+        const track = meter.querySelector('.atlas__meter-track');
+        for (let level = 0; level <= max; level++) {
+          const tick = document.createElement('span');
+          tick.className = 'atlas__meter-tick';
+          tick.style.bottom = `${meterPosition(level, max) * 100}%`;
+          tick.setAttribute('aria-hidden', 'true');
+          const label = document.createElement('span');
+          label.textContent = String(level + 1).padStart(2, '0');
+          tick.append(label);
+          track.append(tick);
+        }
+      }
+      meter.setAttribute('aria-valuetext', `Depth ${(targetDepth + 1).toFixed(2)} of ${max + 1}`);
       meter.setAttribute('aria-valuemax', String(max));
       meter.setAttribute('aria-valuenow', targetDepth.toFixed(2));
     });

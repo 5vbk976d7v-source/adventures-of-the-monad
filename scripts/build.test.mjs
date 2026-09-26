@@ -27,13 +27,13 @@ test('Pages build packages only the UI and public media endpoint config', async 
   });
 
   const site = await buildSite(root);
-  assert.deepEqual((await readdir(site)).sort(), ['.nojekyll', 'CNAME', 'assets', 'favicon.ico', 'index.html']);
+  assert.deepEqual((await readdir(site)).sort(), ['.nojekyll', 'CNAME', 'assets', 'atlas.json', 'favicon.ico', 'index.html']);
   assert.equal(await readFile(path.join(site, 'favicon.ico'), 'utf8'), 'icon');
   assert.deepEqual((await readdir(path.join(site, 'assets'))).sort(), ['artwork', 'config', 'css', 'js']);
   assert.equal(JSON.parse(await readFile(path.join(site, 'assets/config/media-endpoints.json'), 'utf8')).production,
     'https://example.test/catalog.php');
   await assert.rejects(access(path.join(site, 'diagrams')));
-  await assert.rejects(access(path.join(site, 'atlas.json')));
+  assert.equal(await readFile(path.join(site, 'atlas.json'), 'utf8'), '{"old":"catalog"}');
   await assert.rejects(access(path.join(site, 'assets/fixtures')));
   await assert.rejects(access(path.join(site, 'assets/php')));
 });

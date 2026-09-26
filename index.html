@@ -11,11 +11,16 @@
 <body>
   <main id="atlas" class="atlas" aria-live="polite">
     <header class="atlas__hud">
-      <div>
+      <div class="atlas__identity-area">
         <button id="atlas-brand" class="atlas__brand" type="button" aria-label="Return to category list">
           <img src="assets/artwork/ankh_logo.webp" alt="">
           <span>ATLAS</span>
         </button>
+        <a class="atlas__home" href="https://adventuresofthemonad.com/" aria-label="Return to the Adventures of the Monad website">
+          <img src="assets/artwork/ankh_logo.webp" alt="" width="28" height="28">
+          <span class="atlas__home-full"><small>RETURN TO WEBSITE</small>ADVENTURES OF THE MONAD</span>
+          <span class="atlas__home-short">AM</span>
+        </a>
         <div id="atlas-context" class="atlas__context">Human Consciousness</div>
       </div>
       <div class="atlas__signature" aria-hidden="true">A MAP OF HUMAN CONSCIOUSNESS<span>EXPLORE · UNDERSTAND · EXPAND</span></div>
@@ -26,7 +31,6 @@
           <div id="atlas-search-results" class="atlas-search__results" role="listbox" hidden></div>
         </div>
         <span id="atlas-depth" class="atlas__depth">DEPTH 01</span>
-        <button id="atlas-back" class="atlas__back" type="button" hidden aria-label="Go back one level">← BACK</button>
       </div>
     </header>
 
@@ -50,10 +54,10 @@
         <path d="M0 145L1200 530" stroke="url(#fieldSweep)" stroke-width="58" opacity=".35"/>
       </svg>
 
-      <div class="atlas__meter atlas__meter--left" data-meter="left" role="slider" aria-label="Semantic depth" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
+      <div class="atlas__meter atlas__meter--left" data-meter="left" role="slider" aria-label="Semantic depth" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
         <div class="atlas__meter-track"><span class="atlas__meter-fill"></span><span class="atlas__meter-handle"></span></div>
       </div>
-      <div class="atlas__meter atlas__meter--right" data-meter="right" role="slider" aria-label="Semantic depth" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
+      <div class="atlas__meter atlas__meter--right" data-meter="right" role="slider" aria-label="Semantic depth" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" tabindex="0">
         <div class="atlas__meter-track"><span class="atlas__meter-fill"></span><span class="atlas__meter-handle"></span></div>
       </div>
 
@@ -89,8 +93,8 @@
           <h1 id="detail-title">Diagram</h1>
           <p id="detail-caption"></p>
           <div class="detail__actions">
-            <button id="detail-fullscreen-button" class="detail__fullscreen-button" type="button">FULL SCREEN VIEW</button>
-            <button id="detail-copy-link-button" class="detail__fullscreen-button" type="button">COPY PERMANENT LINK</button>
+            <button id="detail-fullscreen-button" class="detail__fullscreen-button" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg><span class="button__label">FULL SCREEN VIEW</span></button>
+            <button id="detail-copy-link-button" class="detail__fullscreen-button" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 9h10v10H9z"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span class="button__label">COPY PERMANENT LINK</span></button>
           </div>
           <p class="detail__hint">Inspect the complete diagram in full screen.</p>
         </aside>
@@ -103,7 +107,7 @@
 
     <footer class="atlas__status">
       <span id="atlas-instruction">SCROLL ↓ TO EXPAND · HOVER + SCROLL ↑ OR CLICK TO ENTER</span>
-      <span>CONSCIOUSNESS ATLAS</span>
+      <button id="atlas-back" class="atlas__back" type="button" hidden aria-label="Go back one level">← BACK</button>
     </footer>
   </main>
 

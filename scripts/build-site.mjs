@@ -22,6 +22,7 @@ export async function buildSite(root = ROOT) {
   await mkdir(destination);
   await cp(path.join(root, 'index.html'), path.join(destination, 'index.html'));
   await cp(path.join(root, 'favicon.ico'), path.join(destination, 'favicon.ico'));
+  await cp(path.join(root, 'atlas.json'), path.join(destination, 'atlas.json'));
   for (const directory of ['css', 'js', 'artwork', 'config']) {
     await copyAssets(path.join(root, 'assets', directory), path.join(destination, 'assets', directory));
   }
