@@ -1,6 +1,7 @@
 import { buildDiagramLink, clearDiagramLink, findDiagramFromLink, loadCatalog, readDiagramLink, safeText } from './atlas-catalog.js';
 import { createDiagramSearch } from './atlas-search.js';
 import { loadSizedImage } from './atlas-images.js';
+import { renderDiagramVideos } from './atlas-videos.js';
 
 (() => {
   'use strict';
@@ -719,6 +720,7 @@ import { loadSizedImage } from './atlas-images.js';
     detailCode.textContent = `DIAGRAM ${catId}.${String(index + 1).padStart(2,'0')}`;
     detailTitle.textContent = nodeTitle(activeDiagram, index);
     detailCaption.textContent = safeText(activeDiagram?.caption, safeText(activeCategory?.description, ''));
+    renderDiagramVideos(document.getElementById('detail-videos'), activeDiagram);
     updateDetailImage();
     detailImage.alt = nodeTitle(activeDiagram,index);
     contextEl.textContent = `${safeText(activeCategory?.title,'Category')} · ${nodeTitle(activeDiagram,index)}`;
