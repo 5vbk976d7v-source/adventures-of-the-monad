@@ -1,0 +1,7 @@
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
+
+# Host-local configuration and runtime state
+media-config.local.php
+state/

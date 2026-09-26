@@ -2,6 +2,6 @@ Options -Indexes
 <FilesMatch "\.(?:php[0-9]?|phtml|phar|cgi|pl|py|sh)$">
   Require all denied
 </FilesMatch>
-<FilesMatch "^folder\.json$">
+<FilesMatch "^folder\.json(?:\..*)?$">
   Require all denied
 </FilesMatch>

@@ -181,9 +181,147 @@ final class AtlasMedia
         return $record;
     }
 
-    public static function buildCatalog(array $config): array
+    /** Reconcile only each category's images list with its current valid files. */
+    public static function syncFolderJson(array $config): int
+    {
+        $root = realpath($config['diagram_dir']);
+        if ($root === false || !is_dir($root)) throw new RuntimeException('Diagram directory is unavailable');
+        $updated = 0;
+        foreach (scandir($root) ?: [] as $folder) {
+            if ($folder === '.' || $folder === '..' || $folder[0] === '.') continue;
+            $directory = $root . DIRECTORY_SEPARATOR . $folder;
+            if (is_link($directory) || !is_dir($directory)) continue;
+
+            $metadataPath = $directory . '/folder.json';
+            $metadata = [];
+            if (file_exists($metadataPath) || is_link($metadataPath)) {
+                if (is_link($metadataPath) || !is_file($metadataPath)) throw new RuntimeException('Unsafe category metadata file');
+                $source = file_get_contents($metadataPath);
+                $metadata = is_string($source) ? json_decode($source, true) : null;
+                if (!is_array($metadata) || json_last_error() !== JSON_ERROR_NONE) {
+                    throw new RuntimeException('Invalid category metadata: ' . $folder);
+                }
+            }
+
+            $files = [];
+            foreach (scandir($directory) ?: [] as $file) {
+                if (!self::validImageName($file)) continue;
+                $source = $directory . DIRECTORY_SEPARATOR . $file;
+                if (is_link($source) || !is_file($source)) continue;
+                try { self::sourceInfo($source, (int)$config['max_pixels']); }
+                catch (RuntimeException) { continue; }
+                $files[] = $file;
+            }
+            usort($files, [self::class, 'natural']);
+            $available = array_fill_keys($files, true);
+            $images = [];
+            $kept = [];
+            $existing = is_array($metadata['images'] ?? null) ? $metadata['images'] : [];
+            foreach ($existing as $item) {
+                if (!is_array($item) || !is_string($item['file'] ?? null)) continue;
+                $file = $item['file'];
+                if (!isset($available[$file]) || isset($kept[$file])) continue;
+                $images[] = $item;
+                $kept[$file] = true;
+            }
+            foreach ($files as $file) {
+                if (isset($kept[$file])) continue;
+                $images[] = ['file' => $file];
+            }
+
+            if (($metadata['images'] ?? null) === $images) continue;
+            $metadata['images'] = $images;
+            $temporary = $directory . '/folder.json.' . bin2hex(random_bytes(5)) . '.tmp';
+            $json = json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+            if (file_put_contents($temporary, $json, LOCK_EX) === false || !rename($temporary, $metadataPath)) {
+                @unlink($temporary);
+                throw new RuntimeException('Unable to update category metadata: ' . $folder);
+            }
+            @chmod($metadataPath, 0640);
+            $updated++;
+        }
+        return $updated;
+    }
+
+    public static function youtubeMap(array $config): array
+    {
+        $path = $config['youtube_map'];
+        if (is_link($path)) throw new RuntimeException('Unsafe YouTube map');
+        if (!file_exists($path)) return [];
+        $map = @parse_ini_file($path, true, INI_SCANNER_RAW);
+        if (!is_array($map)) throw new RuntimeException('Invalid YouTube map INI syntax');
+        $result = [];
+        foreach ($map as $id => $value) {
+            if (!self::safeId((string)$id)) throw new RuntimeException('Invalid YouTube map entry');
+            // Retain support for older comma-separated entries above any sections.
+            if (is_string($value)) $links = explode(',', $value);
+            elseif (is_array($value) && !array_diff(array_keys($value), ['video'])) {
+                $links = $value['video'] ?? [];
+                if (is_string($links)) $links = [$links];
+            } else throw new RuntimeException('Invalid YouTube map entry');
+            if (!is_array($links)) throw new RuntimeException('Invalid YouTube map links');
+            $urls = [];
+            foreach ($links as $url) {
+                if (!is_string($url)) throw new RuntimeException('Invalid YouTube map link');
+                $url = trim($url);
+                if ($url === '') continue;
+                $parts = parse_url($url);
+                if (!$parts || ($parts['scheme'] ?? '') !== 'https'
+                    || !in_array(strtolower($parts['host'] ?? ''), ['youtu.be', 'youtube.com', 'www.youtube.com', 'm.youtube.com'], true)
+                    || isset($parts['user']) || isset($parts['pass']) || isset($parts['port'])
+                    || preg_match('/[\x00-\x20\x7f]/', $url)) {
+                    throw new RuntimeException('Invalid YouTube URL for ' . $id);
+                }
+                $urls[] = $url;
+            }
+            $result[$id] = array_values(array_unique($urls));
+        }
+        return $result;
+    }
+
+    private static function youtubeKey(string $folder, string $diagramId): string
+    {
+        if (!preg_match('/^(\d+)/', $folder, $match) || (int)$match[1] < 1) {
+            throw new RuntimeException('Category folder requires a numeric prefix for the YouTube map');
+        }
+        return sprintf('%02d', (int)$match[1]) . '-' . $diagramId;
+    }
+
+    // Caller holds catalog.lock. Append only, preserving manual formatting and URLs.
+    public static function syncYoutubeMap(array $config): int
+    {
+        $map = self::youtubeMap($config);
+        $catalog = self::buildCatalog($config, true);
+        $missing = [];
+        foreach ($catalog['collections'] as $category) {
+            foreach ($category['images'] as $image) {
+                $key = $image['_youtube_key'];
+                if (!array_key_exists($key, $map)) $missing[$key] = $map[$image['id']] ?? [];
+            }
+        }
+        if (!$missing) return 0;
+        $path = $config['youtube_map'];
+        $source = file_exists($path) ? file_get_contents($path) : '';
+        if ($source === false) throw new RuntimeException('Unable to read YouTube map');
+        $text = $source . ($source !== '' && !str_ends_with($source, "\n") ? "\n" : '');
+        foreach ($missing as $key => $urls) {
+            $text .= "\n[{$key}]\n";
+            if (!$urls) $text .= "video[] = \"\"\n";
+            foreach ($urls as $url) $text .= 'video[] = "' . $url . "\"\n";
+        }
+        $temporary = $path . '.' . bin2hex(random_bytes(5)) . '.tmp';
+        if (file_put_contents($temporary, $text, LOCK_EX) === false || !rename($temporary, $path)) {
+            @unlink($temporary);
+            throw new RuntimeException('Unable to update YouTube map');
+        }
+        @chmod($path, 0640);
+        return count($missing);
+    }
+
+    public static function buildCatalog(array $config, bool $includeYoutubeKeys = false): array
     {
         self::ensureState($config);
+        $youtube = self::youtubeMap($config);
         $registryPath = $config['state_dir'] . '/ids.json';
         $registryLock = fopen($config['state_dir'] . '/ids.lock', 'c');
         if (!$registryLock || !flock($registryLock, LOCK_EX)) throw new RuntimeException('Unable to lock image ID registry');
@@ -256,6 +394,9 @@ final class AtlasMedia
                     $title = is_string($item['title'] ?? null) && trim($item['title']) !== '' ? trim($item['title']) : self::titleFromFilename($file);
                     $caption = is_string($item['caption'] ?? null) ? trim($item['caption']) : '';
                     $record = self::imageRecord($config, $folder, $file, $id, $title, $caption, (int)$config['max_pixels']);
+                    $youtubeKey = self::youtubeKey($folder, $id);
+                    $record['videos'] = $youtube[$youtubeKey] ?? $youtube[$id] ?? [];
+                    if ($includeYoutubeKeys) $record['_youtube_key'] = $youtubeKey;
                     $images[] = $record;
                     $imagesByFile[$file] = $record;
                 }
