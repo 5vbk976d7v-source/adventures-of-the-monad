@@ -5,6 +5,9 @@ This branch contains the small PHP service and diagram files for
 `public_html/atlas-media/`; the atlas UI is hosted separately on GitHub Pages.
 WordPress is not part of this service.
 
+For the simple diagram-upload and YouTube-link workflow, see
+[Add diagrams and YouTube links](MEDIA_EDITOR_GUIDE.md).
+
 ## Runtime files
 
 - `catalog.php` scans category folders, validates image files, applies optional
