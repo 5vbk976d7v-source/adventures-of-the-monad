@@ -34,7 +34,8 @@ try {
     $exampleConfig = $config;
     $exampleConfig['youtube_map'] = dirname(__DIR__) . '/atlas-youtube-map.ini';
     $examples = AtlasMedia::youtubeMap($exampleConfig);
-    check(in_array($examples['01-the-cube'][0], $examples['01-metaverse-antverse-and-universes'], true), 'Example diagrams share a video');
+    check($examples['01-metaverse-antverse-and-universes'] === ['https://youtu.be/o0B57aJn7CM'], 'Example diagram retains its video link');
+    check($examples['01-the-cube'] === [], 'Example diagram can be left without videos');
     check($examples['01-the-icosahedron'] === [], 'Example diagram has no videos');
     file_put_contents($config['youtube_map'], "authored-id = \"https://youtube.com.evil.test/watch?v=bad\"\n");
     try { AtlasMedia::syncYoutubeMap($config); throw new LogicException('Unsafe URL accepted'); }

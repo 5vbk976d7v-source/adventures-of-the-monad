@@ -31,6 +31,8 @@ try {
     check(is_file($live . '/diagrams/01_existing/02_import.png'), 'Renumbers only an imported image with a conflicting prefix');
     check(!file_exists($live . '/diagrams/01_existing/folder.json'), 'Never copies Git folder metadata');
     check(is_file($live . '/diagrams/02_new-category/01_new.png'), 'Imports new category images');
+    $repeatedImport = AtlasMedia::importGitDiagrams($config);
+    check($repeatedImport === ['categories' => 0, 'images' => 0, 'files' => []], 'Does not re-import images that were renamed during a previous sync');
 
     file_put_contents($config['youtube_map'], "[01-existing]\nvideo[] = \"https://youtu.be/live\"\n");
     file_put_contents($git . '/atlas-youtube-map.ini', "[01-existing]\nvideo[] = \"https://youtu.be/live\"\nvideo[] = \"https://youtu.be/new\"\n\n[02-new]\nvideo[] = \"https://youtu.be/category\"\n");

@@ -115,6 +115,23 @@ final class AtlasMedia
         return str_pad((string)$prefix, max(2, strlen($match[1])), '0', STR_PAD_LEFT) . $match[2] . $match[3];
     }
 
+    // A source image may have been renumbered during an earlier import. Its original
+    // filename will then be absent from the live folder, so use its content to avoid
+    // importing the same Git image again on every later sync.
+    private static function liveImageHasSameContent(string $category, string $source): bool
+    {
+        $sourceHash = hash_file('sha256', $source);
+        if ($sourceHash === false) throw new RuntimeException('Unable to read Git diagram image');
+        foreach (scandir($category) ?: [] as $existing) {
+            if (!self::validImageName($existing)) continue;
+            $path = $category . DIRECTORY_SEPARATOR . $existing;
+            if (is_link($path) || !is_file($path)) continue;
+            $existingHash = hash_file('sha256', $path);
+            if (is_string($existingHash) && hash_equals($sourceHash, $existingHash)) return true;
+        }
+        return false;
+    }
+
     private static function sourceInfo(string $path, int $maxPixels): array
     {
         $real = realpath($path);
@@ -354,6 +371,7 @@ final class AtlasMedia
                     }
                     $createdCategory = true;
                 }
+                if (self::liveImageHasSameContent($targetCategory, $source)) continue;
                 $filename = self::importedFilename($targetCategory, $file);
                 $target = $targetCategory . DIRECTORY_SEPARATOR . $filename;
                 $temporary = $target . '.' . bin2hex(random_bytes(5)) . '.tmp';
