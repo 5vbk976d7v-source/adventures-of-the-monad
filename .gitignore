@@ -1,0 +1,6 @@
+.DS_Store
+execution/
+node_modules/
+_site/
+.firecrawl/
+/.worktrees/

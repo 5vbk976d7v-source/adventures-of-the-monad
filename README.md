@@ -1,0 +1,36 @@
+# Consciousness Atlas
+
+Static holographic diagram viewer. The UI is published from `main` to GitHub Pages; diagram originals and the PHP catalog/image service are hosted separately at `https://adventuresofthemonad.com/atlas-media/`. WordPress is not part of the app.
+
+## Main and media branches
+
+`main` contains the static Atlas UI and publishes the site. `media` contains the
+PHP media service, diagrams, and YouTube map. A push to `media` deploys a Git
+source copy to Hostinger's `atlas-media-git/` folder. The permanent live media
+folder is `atlas-media/`; the WordPress **Tools → Atlas Media Sync** action
+imports only new Git diagrams and missing YouTube links into it.
+
+Agents working with diagrams or YouTube links should follow the
+[media branch instructions](https://github.com/5vbk976d7v-source/adventures-of-the-monad/blob/media/README.md).
+
+## Run locally
+
+Requires Node.js 22 or newer.
+
+```sh
+npm ci
+npm test
+npm run build
+npm start
+```
+
+Open `http://127.0.0.1:8080/`. For a local simulation of the hosted media API, use `http://127.0.0.1:8080/?media=simulator`. For an end-to-end check against the deployed Hostinger service, use `http://127.0.0.1:8080/?media=production`.
+
+## Operations
+
+Add and maintain diagram images through Hostinger File Manager in the live
+`atlas-media/` folder, then run **Tools → Atlas Media Sync** in WordPress.
+Read [Image workflow](docs/IMAGE_WORKFLOW.md) before changing category metadata
+or service state.
+
+See [Deployment and local testing](docs/DEPLOYMENT.md) for how the branches and local modes work, and [Atlas product notes](docs/ATLAS_SPEC.md) for the essential design and interaction decisions.
