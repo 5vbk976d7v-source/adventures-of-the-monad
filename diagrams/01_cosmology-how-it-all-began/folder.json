@@ -1,0 +1,51 @@
+{
+  "id": "cosmology-how-it-all-began",
+  "title": "Cosmology: How It All Began",
+  "order": 1,
+  "description": "",
+  "cover": "01_metaverse-antverse-and-universes.png",
+  "images": [
+    {
+      "id": "metaverse-antverse-and-universes",
+      "title": "Metaverse, Antverse and Universes",
+      "file": "01_metaverse-antverse-and-universes.png",
+      "caption": ""
+    },
+    {
+      "id": "the-cube",
+      "title": "The Cube",
+      "file": "02_The Cube.png",
+      "caption": ""
+    },
+    {
+      "id": "the-icosahedron",
+      "title": "The Icosahedron",
+      "file": "03_The Icosahedron.png",
+      "caption": ""
+    },
+    {
+      "id": "the-octahedron",
+      "title": "The Octahedron",
+      "file": "04_The Octahedron.png",
+      "caption": ""
+    },
+    {
+      "id": "the-tetrahedron",
+      "title": "The Tetrahedron",
+      "file": "05_The Tetrahedron.png",
+      "caption": ""
+    },
+    {
+      "id": "metaverse-2c-violet-alien",
+      "title": "Metaverse 2c violet alien",
+      "file": "06_metaverse_2c_violet_alien.png",
+      "caption": ""
+    },
+    {
+      "id": "planes-of-matter-final",
+      "title": "Planes of matter final",
+      "file": "07_planes_of_matter_final.png",
+      "caption": ""
+    }
+  ]
+}
